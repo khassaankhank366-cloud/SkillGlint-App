@@ -4,7 +4,7 @@ import { signIn, signUp, signInWithGoogle, signInWithLinkedIn, signOut, getSessi
 import { fetchProfile, type Profile } from './lib/profile';
 import { saveAndGenerateResume, downloadResumeAsPDF } from './lib/resume';
 import type { Session } from '@supabase/supabase-js';
-import { Home, Bot, PenTool, Wrench, Settings, Shield, Search, Send, ChevronRight, Star, Gift, Flame, Trophy, FileText, RefreshCw, FileEdit, DollarSign, Download, Sparkles, Target, TrendingUp, X, Briefcase, ArrowLeft, Plus, Mic, Palette, LayoutTemplate, User, BookOpen, Clock, Brain, BarChart3, LockKeyhole, HelpCircle, SkipForward, Mail, Link2, Image, FileUp, Cloud, Lightbulb, Compass, Loader2, Check, Zap, Award, Play, Lock } from 'lucide-react';
+import { Home, Bot, PenTool, Wrench, Settings, Shield, Search, Send, ChevronRight, Star, Gift, Flame, Trophy, FileText, RefreshCw, FileEdit, DollarSign, Download, Sparkles, Target, TrendingUp, X, Briefcase, ArrowLeft, Plus, Mic, Palette, LayoutTemplate, User, BookOpen, Clock, Brain, BarChart3, LockKeyhole, HelpCircle, SkipForward, Mail, Link2, Image, FileUp, Cloud, Lightbulb, Compass, Loader2, Check, Award, Play, Lock } from 'lucide-react';
 
 // Simple Vertical Falling Sparks - Soft Cyan/Blue
 const SparksBackground = () => {
@@ -68,8 +68,10 @@ const VipDiamondLogo = ({ size = 120 }: { size?: number }) => {
           </linearGradient>
           <filter id="blueGlow"><feGaussianBlur stdDeviation="3" /></filter>
         </defs>
+        {/* Outer diamond */}
         <path d="M60 10 L110 45 L60 110 L10 45 Z" stroke="rgba(34,211,238,0.3)" strokeWidth="2" fill="rgba(34,211,238,0.05)" />
         <path d="M60 10 L110 45 L60 110 L10 45 Z" stroke="url(#electricBlue)" strokeWidth="2" filter="url(#blueGlow)" />
+        {/* Inner facets */}
         <path d="M60 10 L60 45" stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
         <path d="M10 45 L60 45 L110 45" stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
         <path d="M60 10 L35 45" stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
@@ -159,11 +161,11 @@ const AuthModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Email</label>
-              <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(false)} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Password</label>
-              <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(''); }} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(false)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(false)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <button onClick={() => handleEmailAuth(false)} disabled={loading} className="w-full py-3.5 rounded-2xl font-medium text-white bg-gradient-to-r from-blue-600 to-cyan-600 border border-cyan-400/20 hover:scale-[1.01] transition-transform shadow-lg shadow-cyan-500/20 disabled:opacity-60 disabled:scale-100 flex items-center justify-center gap-2">
               {loading ? <Spinner className="w-5 h-5" /> : 'Log In'}
@@ -179,11 +181,11 @@ const AuthModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Email</label>
-              <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Password</label>
-              <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(''); }} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(true)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(true)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <button onClick={() => handleEmailAuth(true)} disabled={loading} className="w-full py-3.5 rounded-2xl font-semibold text-black bg-gradient-to-r from-cyan-400 to-cyan-500 border border-cyan-400/30 hover:scale-[1.01] transition-transform shadow-lg shadow-cyan-500/20 disabled:opacity-60 disabled:scale-100 flex items-center justify-center gap-2">
               {loading ? <Spinner className="w-5 h-5 border-cyan-400/30 border-t-cyan-400" /> : 'Create New Account'}
@@ -315,6 +317,7 @@ const VipWelcomeOverlay = ({ onBegin }: { onBegin: () => void }) => {
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[180px] animate-glow-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-600/8 rounded-full blur-[160px]" />
 
+      {/* Expanding rings behind diamond */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="absolute w-48 h-48 -translate-x-1/2 -translate-y-1/2 border border-cyan-400/20 rounded-full animate-ring-expand" />
         <div className="absolute w-48 h-48 -translate-x-1/2 -translate-y-1/2 border border-cyan-400/20 rounded-full animate-ring-expand" style={{ animationDelay: '1s' }} />
@@ -433,60 +436,6 @@ const ProfileModal = ({ onClose, profile, session }: { onClose: () => void; prof
   </div>
 );
 
-// Learning progress hook with localStorage persistence
-function useLearningProgress(userId: string | undefined) {
-  const storageKey = `skillglint_progress_${userId || 'guest'}`;
-  const [progress, setProgress] = useState<Record<string, number>>({});
-  const [checkedIn, setCheckedIn] = useState(false);
-  const [streak, setStreak] = useState(7);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const data = JSON.parse(saved);
-        setProgress(data.progress || {});
-        setCheckedIn(data.checkedIn || false);
-        setStreak(data.streak || 7);
-      }
-    } catch { /* ignore parse errors */ }
-  }, [storageKey]);
-
-  const save = (newProgress: Record<string, number>, newCheckedIn: boolean, newStreak: number) => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify({ progress: newProgress, checkedIn: newCheckedIn, streak: newStreak }));
-    } catch { /* ignore */ }
-  };
-
-  const updateCourseProgress = (courseTitle: string, value: number) => {
-    const newProgress = { ...progress, [courseTitle]: Math.min(100, Math.max(0, value)) };
-    setProgress(newProgress);
-    save(newProgress, checkedIn, streak);
-  };
-
-  const completeCourse = (courseTitle: string) => {
-    const newProgress = { ...progress, [courseTitle]: 100 };
-    setProgress(newProgress);
-    save(newProgress, checkedIn, streak);
-  };
-
-  const checkIn = () => {
-    if (checkedIn) return;
-    const newCheckedIn = true;
-    const newStreak = streak + 1;
-    setCheckedIn(newCheckedIn);
-    setStreak(newStreak);
-    save(progress, newCheckedIn, newStreak);
-  };
-
-  const resetCheckIn = () => {
-    setCheckedIn(false);
-    save(progress, false, streak);
-  };
-
-  return { progress, checkedIn, streak, updateCourseProgress, completeCourse, checkIn, resetCheckIn };
-}
-
 const IncomeGoalTracker = () => {
   const [target, setTarget] = useState(1000);
   const [current] = useState(350);
@@ -556,25 +505,6 @@ const SettingsModal = ({ onClose, onSignOut }: { onClose: () => void; onSignOut:
   );
 };
 
-// Sample data for courses and jobs
-const SAMPLE_COURSES = [
-  { title: 'Copy-Paste Mastery', lessons: 8, icon: FileText, baseProgress: 0 },
-  { title: 'Canva Design Pro', lessons: 12, icon: Palette, baseProgress: 0 },
-  { title: 'AI Tools Bootcamp', lessons: 10, icon: Brain, baseProgress: 0 },
-  { title: 'Freelance Success', lessons: 15, icon: Briefcase, baseProgress: 0 },
-  { title: 'Data Entry Pro', lessons: 6, icon: BarChart3, baseProgress: 0 },
-  { title: 'Content Writing', lessons: 9, icon: BookOpen, baseProgress: 0 },
-];
-
-const SAMPLE_JOBS = [
-  { title: 'Data Entry Specialist', company: 'TechFlow', pay: '$22/hr', rating: 4.8 },
-  { title: 'Virtual Assistant', company: 'RemoteFirst', pay: '$25/hr', rating: 4.6 },
-  { title: 'Social Media Designer', company: 'CreativeHub', pay: '$30/hr', rating: 4.9 },
-  { title: 'AI Trainer', company: 'NeuralAI', pay: '$40/hr', rating: 4.7 },
-  { title: 'Content Writer', company: 'WriteHub', pay: '$28/hr', rating: 4.5 },
-  { title: 'Freelance PM', company: 'Upwork Pro', pay: '$32/hr', rating: 4.8 },
-];
-
 // Career Insight Card - AI-analyzed job recommendations based on course progress
 const CareerInsightCard = ({ courses }: { courses: { title: string; progress: number; icon: React.ElementType }[] }) => {
   const completed = courses.filter(c => c.progress >= 100);
@@ -606,7 +536,7 @@ const CareerInsightCard = ({ courses }: { courses: { title: string; progress: nu
       {topJobs.length > 0 ? (
         <div className="mt-4 space-y-2.5">
           {topJobs.map((job, i) => (
-            <div key={i} className="flex items-center gap-3 bg-black/25 rounded-xl p-3.5 border border-white/5 hover:border-cyan-400/20 hover:bg-black/40 transition-all duration-300 cursor-pointer group">
+            <div key={i} className="flex items-center gap-3 bg/black/25 rounded-xl p-3.5 border border-white/5 hover:border-cyan-400/20 hover:bg-black/40 transition-all duration-300 cursor-pointer group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400/15 to-blue-500/15 flex items-center justify-center flex-shrink-0"><Briefcase className="w-5 h-5 text-cyan-400/70" /></div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2"><p className="text-white text-sm font-medium truncate">{job.title}</p>{job.match >= 90 && <span className="px-1.5 py-0.5 bg-cyan-400/15 text-cyan-400 text-[10px] font-medium rounded-md flex-shrink-0">{job.tag}</span>}</div>
@@ -618,18 +548,10 @@ const CareerInsightCard = ({ courses }: { courses: { title: string; progress: nu
           <p className="text-white/30 text-xs text-center pt-1">Complete more courses to unlock better matches</p>
         </div>
       ) : (
-        <div className="mt-4 space-y-2.5">
-          {SAMPLE_JOBS.slice(0, 3).map((job, i) => (
-            <div key={i} className="flex items-center gap-3 bg-black/25 rounded-xl p-3.5 border border-white/5 hover:border-cyan-400/20 hover:bg-black/40 transition-all duration-300 cursor-pointer group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400/15 to-blue-500/15 flex items-center justify-center flex-shrink-0"><Briefcase className="w-5 h-5 text-cyan-400/70" /></div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{job.title}</p>
-                <p className="text-white/40 text-xs mt-0.5">{job.company} · {job.pay}</p>
-              </div>
-              <div className="flex flex-col items-end flex-shrink-0"><div className="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-cyan-400/50 to-blue-500/50 rounded-full" style={{ width: '70%' }} /></div><span className="text-cyan-400/60 text-xs font-medium mt-1">70%</span></div>
-            </div>
-          ))}
-          <p className="text-white/30 text-xs text-center pt-1">Start a course to unlock personalized job recommendations</p>
+        <div className="mt-4 flex flex-col items-center py-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3"><Compass className="w-6 h-6 text-white/30" /></div>
+          <p className="text-white/50 text-sm">Stay tuned, we are finding the best matches for you</p>
+          <p className="text-white/30 text-xs mt-1">Start a course to unlock personalized job recommendations</p>
         </div>
       )}
     </div>
@@ -646,14 +568,7 @@ const EmptyState = ({ icon: Icon, title, desc, action }: { icon: React.ElementTy
   </div>
 );
 
-// Coming Soon badge
-const ComingSoonBadge = () => (
-  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-400/10 border border-amber-400/20 rounded-full text-amber-400 text-xs font-medium">
-    <Clock className="w-3 h-3" /> Coming Soon
-  </span>
-);
-
-// AI Assistant Attachment Menu
+// AI Assistant Attachment Menu - solid dark background for readability
 const AIAttachMenu = ({ onClose, onSelect }: { onClose: () => void; onSelect: (label: string) => void }) => {
   const options = [
     { icon: FileUp, label: 'Upload Resume (PDF/Doc)', desc: 'Share your resume for analysis' },
@@ -676,13 +591,13 @@ const AIAttachMenu = ({ onClose, onSelect }: { onClose: () => void; onSelect: (l
   );
 };
 
-const ToolCard = ({ icon: Icon, title, desc, onClick, badge }: { icon: React.ElementType; title: string; desc: string; onClick: () => void; badge?: string }) => (
+const ToolCard = ({ icon: Icon, title, desc, onClick }: { icon: React.ElementType; title: string; desc: string; onClick: () => void }) => (
   <button onClick={onClick} className="flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-5 hover:border-cyan-400/30 hover:scale-[1.01] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/10 transition-all duration-300 text-left w-full group">
     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
       <Icon className="w-7 h-7 text-cyan-400" />
     </div>
     <div className="flex-1 min-w-0"><h3 className="text-white font-medium text-lg">{title}</h3><p className="text-white/50 text-sm">{desc}</p></div>
-    {badge ? <ComingSoonBadge /> : <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all flex-shrink-0" />}
+    <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all flex-shrink-0" />
   </button>
 );
 
@@ -715,9 +630,85 @@ const FullScreenTool = ({ title, icon: Icon, onBack, children }: { title: string
   </div>
 );
 
+const SAMPLE_JOBS = [
+  { title: 'Data Entry Specialist', company: 'TechFlow', pay: '$22/hr', rating: 4.8 },
+  { title: 'Virtual Assistant', company: 'RemoteFirst', pay: '$25/hr', rating: 4.6 },
+  { title: 'Social Media Designer', company: 'CreativeHub', pay: '$30/hr', rating: 4.9 },
+  { title: 'AI Trainer', company: 'NeuralAI', pay: '$40/hr', rating: 4.7 },
+  { title: 'Content Writer', company: 'WriteHub', pay: '$28/hr', rating: 4.5 },
+  { title: 'Freelance PM', company: 'Upwork Pro', pay: '$32/hr', rating: 4.8 },
+];
+
+const SAMPLE_COURSES = [
+  { title: 'Copy-Paste Mastery', lessons: 8, icon: FileText },
+  { title: 'Canva Design Pro', lessons: 12, icon: Palette },
+  { title: 'AI Tools Bootcamp', lessons: 10, icon: Brain },
+  { title: 'Freelance Success', lessons: 15, icon: Trophy },
+  { title: 'Data Entry Pro', lessons: 6, icon: BookOpen },
+  { title: 'Content Writing', lessons: 9, icon: BookOpen },
+];
+
+function useLearningProgress(userId: string | undefined) {
+  const storageKey = `skillglint_progress_${userId || 'guest'}`;
+  const [progress, setProgress] = useState<Record<string, number>>({});
+  const [checkedIn, setCheckedIn] = useState(false);
+  const [streak, setStreak] = useState(7);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const data = JSON.parse(saved);
+        setProgress(data.progress || {});
+        setCheckedIn(data.checkedIn || false);
+        setStreak(data.streak || 7);
+      }
+    } catch { /* ignore */ }
+  }, [storageKey]);
+
+  const save = (p: Record<string, number>, c: boolean, s: number) => {
+    try { localStorage.setItem(storageKey, JSON.stringify({ progress: p, checkedIn: c, streak: s })); } catch { /* ignore */ }
+  };
+
+  const updateCourseProgress = (title: string, value: number) => {
+    const np = { ...progress, [title]: Math.min(100, Math.max(0, value)) };
+    setProgress(np); save(np, checkedIn, streak);
+  };
+
+  const completeCourse = (title: string) => {
+    const np = { ...progress, [title]: 100 };
+    setProgress(np); save(np, checkedIn, streak);
+  };
+
+  const checkIn = () => {
+    if (checkedIn) return;
+    setCheckedIn(true); setStreak(streak + 1);
+    save(progress, true, streak + 1);
+  };
+
+  return { progress, checkedIn, streak, updateCourseProgress, completeCourse, checkIn };
+}
+
 const HomeView = ({ onProfile, onSettings, onNavigate, profile, session, learning }: { onProfile: () => void; onSettings: () => void; onNavigate: (tab: string, tool?: string) => void; profile: Profile | null; session: Session | null; learning: ReturnType<typeof useLearningProgress> }) => {
   const { progress, checkedIn, streak, checkIn } = learning;
-  const courses = SAMPLE_COURSES.map(c => ({ ...c, progress: progress[c.title] || c.baseProgress }));
+  const [jobs, setJobs] = useState<{ title: string; company: string; pay: string; rating: number }[]>([]);
+  const [courses, setCourses] = useState<{ title: string; lessons: number; progress: number; icon: React.ElementType }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const [jobsRes, coursesRes] = await Promise.all([
+        supabase.from('jobs').select('title, company, pay, rating').order('created_at', { ascending: false }),
+        supabase.from('courses').select('title, lessons, progress, icon_name').order('created_at', { ascending: false }),
+      ]);
+      const iconByName: Record<string, React.ElementType> = { FileText, Palette, Brain, Trophy, BookOpen };
+      const fetchedJobs = (jobsRes.data || SAMPLE_JOBS) as { title: string; company: string; pay: string; rating: number }[];
+      const fetchedCourses = ((coursesRes.data && coursesRes.data.length > 0 ? coursesRes.data : SAMPLE_COURSES.map(c => ({ title: c.title, lessons: c.lessons, progress: 0, icon_name: '' })))).map((c: { title: string; lessons: number; progress: number; icon_name: string }) => ({ title: c.title, lessons: c.lessons, progress: progress[c.title] || c.progress, icon: iconByName[c.icon_name] || (SAMPLE_COURSES.find(sc => sc.title === c.title)?.icon) || BookOpen }));
+      setJobs(fetchedJobs);
+      setCourses(fetchedCourses);
+      setLoading(false);
+    })();
+  }, [progress]);
 
   return (
     <>
@@ -751,13 +742,19 @@ const HomeView = ({ onProfile, onSettings, onNavigate, profile, session, learnin
             <button className="text-cyan-400 text-xs font-medium">View All</button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {SAMPLE_JOBS.map((j, i) => (
-              <div key={i} className="bg-black/30 backdrop-blur rounded-2xl p-4 border border-white/5 hover:border-cyan-400/30 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/10 transition-all duration-300 cursor-pointer group">
-                <p className="text-white text-sm font-medium">{j.title}</p>
-                <p className="text-white/40 text-xs mt-0.5">{j.company}</p>
-                <div className="flex justify-between mt-3"><span className="text-cyan-400 font-semibold text-sm">{j.pay}</span><span className="text-white/40 text-xs flex items-center gap-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />{j.rating}</span></div>
-              </div>
-            ))}
+            {loading ? (
+              <div className="col-span-full flex items-center justify-center py-8"><span className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full" style={{ animation: 'spin 0.6s linear infinite' }} /></div>
+            ) : jobs.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-white/40 text-sm">No jobs available right now. Check back soon!</div>
+            ) : (
+              jobs.map((j, i) => (
+                <div key={i} className="bg-black/30 backdrop-blur rounded-2xl p-4 border border-white/5 hover:border-cyan-400/30 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/10 transition-all duration-300 cursor-pointer group">
+                  <p className="text-white text-sm font-medium">{j.title}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{j.company}</p>
+                  <div className="flex justify-between mt-3"><span className="text-cyan-400 font-semibold text-sm">{j.pay}</span><span className="text-white/40 text-xs flex items-center gap-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />{j.rating}</span></div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -772,22 +769,24 @@ const HomeView = ({ onProfile, onSettings, onNavigate, profile, session, learnin
             <button onClick={() => onNavigate('courses')} className="text-cyan-400 text-xs font-medium">All Courses</button>
           </div>
           <div className="space-y-3">
-            {courses.slice(0, 3).map((c, i) => (
-              <div key={i} className="flex items-center gap-4 p-3 bg-black/30 rounded-xl border border-white/5 hover:border-cyan-400/20 transition-colors cursor-pointer">
-                <c.icon className="w-8 h-8 text-cyan-400/60" />
-                <div className="flex-1"><p className="text-white text-sm font-medium">{c.title}</p><p className="text-white/40 text-xs">{c.lessons} lessons</p></div>
-                {c.progress > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-cyan-400 rounded-full" style={{ width: `${c.progress}%` }} /></div>
-                    <span className="text-white/40 text-xs">{c.progress}%</span>
-                  </div>
-                ) : (
-                  <button onClick={() => onNavigate('courses')} className="px-3 py-1.5 bg-cyan-400/10 border border-cyan-400/20 rounded-lg text-cyan-400 text-xs font-medium hover:bg-cyan-400/20 transition-colors flex items-center gap-1">
-                    <Play className="w-3 h-3" /> Start
-                  </button>
-                )}
-              </div>
-            ))}
+            {loading ? (
+              <div className="flex items-center justify-center py-8"><span className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full" style={{ animation: 'spin 0.6s linear infinite' }} /></div>
+            ) : courses.length === 0 ? (
+              <div className="text-center py-8 text-white/40 text-sm">No courses available yet. Check back soon!</div>
+            ) : (
+              courses.slice(0, 3).map((c, i) => (
+                <div key={i} className="flex items-center gap-4 p-3 bg-black/30 rounded-xl border border-white/5 hover:border-cyan-400/20 transition-colors cursor-pointer">
+                  <c.icon className="w-8 h-8 text-cyan-400/60" />
+                  <div className="flex-1"><p className="text-white text-sm font-medium">{c.title}</p><p className="text-white/40 text-xs">{c.lessons} lessons</p></div>
+                  {c.progress > 0 && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-cyan-400 rounded-full" style={{ width: `${c.progress}%` }} /></div>
+                      <span className="text-white/40 text-xs">{c.progress}%</span>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </main>
@@ -795,30 +794,29 @@ const HomeView = ({ onProfile, onSettings, onNavigate, profile, session, learnin
   );
 };
 
-// Simulated AI response generator
 function generateAIResponse(input: string, tone: string): string {
   const lower = input.toLowerCase();
-  const toneIntro = tone === 'Creative' ? "Here's a creative take on that" : tone === 'Technical' ? "From a technical perspective" : "Here's my professional analysis";
+  const intro = tone === 'Creative' ? "Here's a creative take" : tone === 'Technical' ? "From a technical angle" : "Here's my professional analysis";
 
   if (lower.includes('resume') || lower.includes('cv')) {
-    return `${toneIntro}: Your resume should highlight quantifiable achievements. For example, instead of "managed data entry," use "Processed 500+ records daily with 99.8% accuracy." Key tips:\n\n1. Use ATS-friendly keywords from the job description\n2. Keep it to 1-2 pages maximum\n3. Start bullet points with action verbs\n4. Include metrics and numbers wherever possible\n\nWould you like me to help you build one with the Resume Builder tool?`;
+    return `${intro}: Your resume should highlight quantifiable achievements. Instead of "managed data entry," use "Processed 500+ records daily with 99.8% accuracy."\n\n1. Use ATS-friendly keywords from the job description\n2. Keep it to 1-2 pages maximum\n3. Start bullet points with action verbs\n4. Include metrics and numbers wherever possible\n\nWould you like me to help you build one with the Resume Builder tool?`;
   }
   if (lower.includes('job') || lower.includes('career')) {
-    return `${toneIntro}: Based on current market trends, here are high-demand freelance skills:\n\n1. Data Entry & Virtual Assistance ($18-25/hr)\n2. Content Writing ($25-35/hr)\n3. Social Media Design ($30-45/hr)\n4. AI Prompt Engineering ($40-60/hr)\n\nI recommend starting with the "Freelance Success" course to build your foundation. Your skill profile suggests you'd excel in data-focused roles.`;
+    return `${intro}: Based on current market trends, here are high-demand freelance skills:\n\n1. Data Entry & Virtual Assistance ($18-25/hr)\n2. Content Writing ($25-35/hr)\n3. Social Media Design ($30-45/hr)\n4. AI Prompt Engineering ($40-60/hr)\n\nI recommend starting with the "Freelance Success" course to build your foundation.`;
   }
   if (lower.includes('skill') || lower.includes('learn')) {
-    return `${toneIntro}: Here's a personalized learning roadmap for you:\n\n1. Start with "Copy-Paste Mastery" — fundamentals of remote work\n2. Move to "Data Entry Pro" — build speed and accuracy\n3. Take "Freelance Success" — learn to find clients\n4. Add "AI Tools Bootcamp" — stay ahead of the curve\n\nEach course takes 2-4 hours. Complete the daily check-in to maintain your streak!`;
+    return `${intro}: Here's a personalized learning roadmap:\n\n1. Start with "Copy-Paste Mastery" — fundamentals of remote work\n2. Move to "Data Entry Pro" — build speed and accuracy\n3. Take "Freelance Success" — learn to find clients\n4. Add "AI Tools Bootcamp" — stay ahead of the curve\n\nEach course takes 2-4 hours. Complete the daily check-in to maintain your streak!`;
   }
   if (lower.includes('salary') || lower.includes('rate') || lower.includes('pay')) {
-    return `${toneIntro}: For competitive freelance pricing:\n\n- Beginner: $15-20/hr (first 3 months)\n- Intermediate: $25-35/hr (6-12 months experience)\n- Expert: $40-60/hr (1+ year with portfolio)\n\nUse the Currency Converter in Utilities to calculate rates in PKR. Don't undervalue your work — start at $20/hr minimum and negotiate up.`;
+    return `${intro}: For competitive freelance pricing:\n\n- Beginner: $15-20/hr (first 3 months)\n- Intermediate: $25-35/hr (6-12 months)\n- Expert: $40-60/hr (1+ year with portfolio)\n\nUse the Currency Converter in Utilities to calculate rates in PKR. Don't undervalue your work!`;
   }
   if (lower.includes('proposal') || lower.includes('cover letter')) {
-    return `${toneIntro}: A winning proposal has 3 parts:\n\n1. Hook — Reference something specific from their job post\n2. Value — Show how you solve their problem (with examples)\n3. CTA — End with a clear next step\n\nTry the Cover Letter Writer in Writer Tools — it generates a tailored letter from any job description in seconds.`;
+    return `${intro}: A winning proposal has 3 parts:\n\n1. Hook — Reference something specific from their job post\n2. Value — Show how you solve their problem (with examples)\n3. CTA — End with a clear next step\n\nTry the Cover Letter Writer in Writer Tools — it generates a tailored letter from any job description in seconds.`;
   }
   if (lower.includes('linkedin')) {
-    return `${toneIntro}: To optimize your LinkedIn profile:\n\n1. Professional headshot (clear, well-lit)\n2. Compelling headline: "Freelance [Role] | Helping [target audience]"\n3. Summary with keywords recruiters search for\n4. Add skills and get endorsements\n5. Post regularly about your work\n\nUse the LinkedIn Optimizer tool for AI-powered suggestions.`;
+    return `${intro}: To optimize your LinkedIn profile:\n\n1. Professional headshot (clear, well-lit)\n2. Compelling headline: "Freelance [Role] | Helping [target audience]"\n3. Summary with keywords recruiters search for\n4. Add skills and get endorsements\n5. Post regularly about your work\n\nUse the LinkedIn Optimizer tool for AI-powered suggestions.`;
   }
-  return `${toneIntro}: That's a great question! Here's what I recommend:\n\n1. Start with the courses in the "Continue Learning" section on your dashboard\n2. Use the Writer Tools to build your resume and cover letters\n3. Check the Scam Alert tool before joining any new platform\n4. Track your daily progress with check-ins\n\nIs there a specific area you'd like to dive deeper into?`;
+  return `${intro}: That's a great question! Here's what I recommend:\n\n1. Start with the courses in the "Continue Learning" section on your dashboard\n2. Use the Writer Tools to build your resume and cover letters\n3. Check the Scam Alert tool before joining any new platform\n4. Track your daily progress with check-ins\n\nIs there a specific area you'd like to dive deeper into?`;
 }
 
 const AIAssistantView = ({ onProfile, onSettings, session, profile }: { onProfile: () => void; onSettings: () => void; session: Session | null; profile: Profile | null }) => {
@@ -875,15 +873,11 @@ const AIAssistantView = ({ onProfile, onSettings, session, profile }: { onProfil
     })();
   };
 
-  const handleFileUpload = () => {
-    fileInputRef.current?.click();
-  };
+  const handleFileUpload = () => { fileInputRef.current?.click(); };
 
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setAttachLabel(`${file.name} (${(file.size / 1024).toFixed(0)} KB)`);
-    }
+    if (file) setAttachLabel(`${file.name} (${(file.size / 1024).toFixed(0)} KB)`);
   };
 
   return (
@@ -929,7 +923,7 @@ const AIAssistantView = ({ onProfile, onSettings, session, profile }: { onProfil
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2" strokeLinejoin="round"><path d="M12 2 L22 9 L12 22 L2 9 Z" /></svg>
                   </div>
                 )}
-                <div className={`max-w-[80%] rounded-2xl px-5 py-3.5 whitespace-pre-line ${m.role === 'user' ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black font-medium' : 'bg-white/5 backdrop-blur border border-white/5 text-white'}`}>{m.content}</div>
+                <div className={`max-w-[80%] rounded-2xl px-5 py-3.5 ${m.role === 'user' ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black font-medium' : 'bg-white/5 backdrop-blur border border-white/5 text-white'}`}>{m.content}</div>
               </div>
             ))}
             {loading && (
@@ -973,7 +967,7 @@ const AIAssistantView = ({ onProfile, onSettings, session, profile }: { onProfil
                 {showAttach && <AIAttachMenu onClose={() => setShowAttach(false)} onSelect={(label) => { if (label.includes('Upload')) handleFileUpload(); else setAttachLabel(label); }} />}
                 <button onClick={() => setShowAttach(!showAttach)} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showAttach ? 'text-cyan-400 bg-cyan-400/15' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}><Plus className={`w-5 h-5 transition-transform duration-300 ${showAttach ? 'rotate-45' : ''}`} /></button>
               </div>
-              <button onClick={handleFileUpload} className="w-10 h-10 rounded-xl flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"><Mic className="w-5 h-5" /></button>
+              <button className="w-10 h-10 rounded-xl flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"><Mic className="w-5 h-5" /></button>
               <input value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && sendMessage(input)} placeholder="Ask about career, resumes, or skills..." className="flex-1 bg-transparent px-2 py-2.5 text-white text-sm placeholder-white/40 outline-none" />
               <button onClick={() => sendMessage(input)} disabled={loading || !input.trim()} className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-cyan-400/30 hover:scale-105 active:scale-95 transition-transform disabled:opacity-40 disabled:scale-100"><Send className="w-5 h-5 text-black" /></button>
             </div>
@@ -1020,7 +1014,7 @@ const WriterToolsView = ({ onProfile, onSettings, activeTool, setActiveTool }: {
           <div className="space-y-4">
             <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
               <div className="space-y-4">
-                <input value={resume.name} onChange={(e) => setResume({ ...resume, name: e.target.value })} placeholder="Full Name" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                <input value={resume.name} onChange={(e) => setResume({ ...resume, name: e.target.value })} placeholder="Full Name" className="w-full bg/black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
                 <input value={resume.education} onChange={(e) => setResume({ ...resume, education: e.target.value })} placeholder="Education (e.g., BS in Computer Science)" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
                 <textarea value={resume.skills} onChange={(e) => setResume({ ...resume, skills: e.target.value })} placeholder="Skills (comma separated: Data Entry, Excel, Writing...)" rows={3} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none resize-none transition-colors" />
                 {resumeError && <p className="text-red-400 text-sm">{resumeError}</p>}
@@ -1052,28 +1046,10 @@ const WriterToolsView = ({ onProfile, onSettings, activeTool, setActiveTool }: {
           <div className="space-y-4">
             <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
               <textarea value={textToSpin} onChange={(e) => setTextToSpin(e.target.value)} placeholder="Paste your article, blog post, or content here to spin..." rows={6} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none resize-none transition-colors" />
-              <button onClick={() => {
-                if (!textToSpin.trim()) return;
-                const sentences = textToSpin.split('. ').map(s => {
-                  const words = s.split(' ');
-                  if (words.length > 4) return words.reverse().join(' ');
-                  return s;
-                });
-                setSpun(sentences.join('. '));
-              }} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+              <button onClick={() => setSpun(textToSpin.split(' ').reverse().join(' '))} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
                 <RefreshCw className="w-5 h-5" /> Spin Text Now
               </button>
-              {spun && (
-                <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-cyan-400 text-sm font-medium flex items-center gap-1.5"><Check className="w-4 h-4" /> Spun Content</span>
-                    <button onClick={() => { navigator.clipboard?.writeText(spun); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-400/20 border border-cyan-400/30 rounded-lg text-cyan-400 text-xs hover:bg-cyan-400/30 transition-colors">
-                      <Download className="w-3.5 h-3.5" /> Copy
-                    </button>
-                  </div>
-                  <p className="text-white/80 text-sm leading-relaxed">{spun}</p>
-                </div>
-              )}
+              {spun && <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl text-white/80">{spun}</div>}
             </div>
           </div>
         )}
@@ -1081,46 +1057,17 @@ const WriterToolsView = ({ onProfile, onSettings, activeTool, setActiveTool }: {
           <div className="space-y-4">
             <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
               <textarea value={jobDesc} onChange={(e) => setJobDesc(e.target.value)} placeholder="Paste the full job description here..." rows={5} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none resize-none transition-colors" />
-              <button onClick={() => {
-                if (!jobDesc.trim()) return;
-                const keywords = jobDesc.split(' ').slice(0, 5).join(', ');
-                setCover(`Dear Hiring Manager,
-
-I am excited to apply for this opportunity. After reviewing the job description, I am confident that my skills in ${keywords} align perfectly with your requirements.
-
-Key Qualifications:
-- Proven experience in relevant field with measurable results
-- Strong communication and collaboration skills
-- Self-motivated with a track record of delivering quality work on time
-- Adaptable and quick to learn new tools and processes
-
-I am particularly drawn to this role because it offers the opportunity to contribute meaningfully while growing professionally. I am available to start immediately and can work across time zones.
-
-I would welcome the chance to discuss how my background can benefit your team. Thank you for your consideration.
-
-Best regards,
-${resume.name || 'Your Name'}`);
-              }} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+              <button onClick={() => setCover(`Dear Hiring Manager,\n\nI am thrilled to apply for this opportunity. With my expertise in ${jobDesc.slice(0, 40)}..., I am confident I can deliver exceptional results.\n\nKey achievements:\n- 5+ years relevant experience\n- Proven track record of success\n- Strong communication skills\n\nI look forward to discussing how I can contribute.\n\nBest regards,\nHassaan Khan`)} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
                 <Sparkles className="w-5 h-5" /> Generate Cover Letter
               </button>
-              {cover && (
-                <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-cyan-400 text-sm font-medium flex items-center gap-1.5"><Check className="w-4 h-4" /> Cover Letter Generated</span>
-                    <button onClick={() => navigator.clipboard?.writeText(cover)} className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-400/20 border border-cyan-400/30 rounded-lg text-cyan-400 text-xs hover:bg-cyan-400/30 transition-colors">
-                      <Download className="w-3.5 h-3.5" /> Copy
-                    </button>
-                  </div>
-                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{cover}</p>
-                </div>
-              )}
+              {cover && <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl text-white/80 whitespace-pre-line">{cover}</div>}
             </div>
           </div>
         )}
         {activeTool === 'linkedin' && (
           <div className="space-y-4">
             <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-              <p className="text-white/50 text-sm mb-4">Paste your current LinkedIn headline and summary to get AI-powered optimization suggestions.</p>
+              <p className="text-white/50 text-sm mb-4">Paste your current LinkedIn headline to get AI-powered optimization suggestions.</p>
               <input value={linkedinInput} onChange={(e) => setLinkedinInput(e.target.value)} placeholder="Current headline (e.g., 'Looking for work')" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors mb-3" />
               <button onClick={() => {
                 if (!linkedinInput.trim()) return;
@@ -1221,19 +1168,17 @@ Why Choose Me:
 
 My Approach:
 1. Discovery — Understand your exact requirements and goals
-2. Execution — Deliver ${proposalInput.project} with regular progress updates
+2. Execution — Deliver with regular progress updates
 3. Review — Incorporate your feedback and refine
 4. Delivery — Final handover with documentation
 
 Timeline: ${proposalInput.timeline || '5-7 business days'}
 Budget: ${proposalInput.budget || 'Open to discussion'}
 
-I'm available to start immediately and can dedicate focused time to your project. Let's discuss the details — I'm happy to jump on a quick call.
-
-Looking forward to working with you!
+I'm available to start immediately. Let's discuss the details!
 
 Best regards,
-${resume.name || 'Your Name'}`);
+Your Name`);
                 }} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
                   <Send className="w-5 h-5" /> Generate Proposal
                 </button>
@@ -1294,11 +1239,6 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
     { id: 'notes', icon: FileText, title: 'Quick Notes', desc: 'Save important info' }
   ];
 
-  const checkScam = () => {
-    const found = scamKeywords.find(k => scamSearch.toLowerCase().includes(k.toLowerCase()));
-    setScamResult(found ? { safe: false, message: `"${found}" is a KNOWN SCAM SITE. Do NOT engage or share any personal information!` } : { safe: true, message: 'No known scams detected. Always verify independently before engaging.' });
-  };
-
   useEffect(() => {
     if (!timing || timerStart === null) return;
     const interval = setInterval(() => setElapsed(Date.now() - timerStart), 1000);
@@ -1339,6 +1279,11 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
 
   const deleteNote = (id: string) => setNotes(notes.filter(n => n.id !== id));
 
+  const checkScam = () => {
+    const found = scamKeywords.find(k => scamSearch.toLowerCase().includes(k.toLowerCase()));
+    setScamResult(found ? { safe: false, message: `"${found}" is a KNOWN SCAM SITE. Do NOT engage or share any personal information!` } : { safe: true, message: 'No known scams detected. Always verify independently before engaging.' });
+  };
+
   if (activeTool && activeTool !== 'none') {
     const tool = tools.find(t => t.id === activeTool);
     if (!tool) return null;
@@ -1353,7 +1298,7 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
               <div className="flex gap-3">
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <input value={scamSearch} onChange={(e) => setScamSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && checkScam()} placeholder="Enter website name..." className="w-full bg-black/40 border border-white/5 rounded-2xl pl-12 pr-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                  <input value={scamSearch} onChange={(e) => setScamSearch(e.target.value)} placeholder="Enter website name..." className="w-full bg-black/40 border border-white/5 rounded-2xl pl-12 pr-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
                 </div>
                 <button onClick={checkScam} className="px-6 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-medium text-black shadow-lg shadow-cyan-400/25 hover:scale-[1.01] transition-transform">Check</button>
               </div>
@@ -1418,7 +1363,7 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
               <div className="text-5xl font-mono font-bold text-white mb-4">
                 {Math.floor(elapsed / 3600000).toString().padStart(2, '0')}:{Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0')}:{Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0')}
               </div>
-              <button onClick={toggleTimer} className={`px-8 py-3 rounded-xl font-medium transition-all ${timing ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black'}`}>
+              <button onClick={toggleTimer} className={timing ? 'px-8 py-3 rounded-xl font-medium bg-red-500/20 text-red-400 border border-red-500/30' : 'px-8 py-3 rounded-xl font-medium bg-gradient-to-r from-cyan-400 to-cyan-500 text-black'}>
                 {timing ? 'Stop Timer' : 'Start Timer'}
               </button>
             </div>
@@ -1432,10 +1377,6 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
                       <span className="text-cyan-400 text-sm font-medium">{Math.floor(entry.duration / 60)}m {entry.duration % 60}s</span>
                     </div>
                   ))}
-                </div>
-                <div className="mt-3 pt-3 border-t border-white/5 flex justify-between">
-                  <span className="text-white/40 text-sm">Total Time</span>
-                  <span className="text-cyan-400 font-medium">{Math.floor(timeEntries.reduce((a, e) => a + e.duration, 0) / 60)}m {timeEntries.reduce((a, e) => a + e.duration, 0) % 60}s</span>
                 </div>
               </div>
             )}
@@ -1520,10 +1461,9 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
   );
 };
 
-// Courses View
 const CoursesView = ({ onProfile, onSettings, learning, onBack }: { onProfile: () => void; onSettings: () => void; learning: ReturnType<typeof useLearningProgress>; onBack: () => void }) => {
   const { progress, updateCourseProgress, completeCourse } = learning;
-  const courses = SAMPLE_COURSES.map(c => ({ ...c, progress: progress[c.title] || c.baseProgress }));
+  const courses = SAMPLE_COURSES.map(c => ({ ...c, progress: progress[c.title] || 0 }));
 
   return (
     <div className="min-h-screen bg-[#0B0F19] relative">
@@ -1550,7 +1490,7 @@ const CoursesView = ({ onProfile, onSettings, learning, onBack }: { onProfile: (
               {c.progress > 0 && (
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500" style={{ width: `${c.progress}%` }} />
+                    <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500" style={{ width: c.progress + '%' }} />
                   </div>
                   <span className="text-white/40 text-xs">{c.progress}%</span>
                 </div>
@@ -1587,13 +1527,13 @@ const Dashboard = ({ onSignOut, profile, session }: { onSignOut: () => void; pro
   const [utilityTool, setUtilityTool] = useState('none');
   const learning = useLearningProgress(session?.user?.id);
 
-  const handleNavigate = (tab: string) => {
+  const handleNavigate = (tab: string, tool?: string) => {
     setNav(tab);
     setWriterTool('none');
     setUtilityTool('none');
+    if (tool && tab === 'writer') setWriterTool(tool);
+    if (tool && tab === 'utilities') setUtilityTool(tool);
   };
-
-  const showFullTool = (nav === 'writer' && writerTool !== 'none') || (nav === 'utilities' && utilityTool !== 'none') || nav === 'courses';
 
   return (
     <div className="min-h-screen bg-[#0B0F19] relative">
@@ -1602,10 +1542,10 @@ const Dashboard = ({ onSignOut, profile, session }: { onSignOut: () => void; pro
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[150px]" />
         <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-cyan-600/5 rounded-full blur-[180px]" />
       </div>
-      {showFullTool ? (
-        nav === 'courses' ? (
-          <CoursesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} learning={learning} onBack={() => setNav('home')} />
-        ) : nav === 'writer' ? (
+      {nav === 'courses' ? (
+        <CoursesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} learning={learning} onBack={() => setNav('home')} />
+      ) : (nav === 'writer' && writerTool !== 'none') || (nav === 'utilities' && utilityTool !== 'none') ? (
+        nav === 'writer' ? (
           <WriterToolsView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool={writerTool} setActiveTool={setWriterTool} />
         ) : (
           <UtilitiesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool={utilityTool} setActiveTool={setUtilityTool} />
@@ -1690,6 +1630,7 @@ function App() {
     </div>
   );
 
+  // Landing page — visible to everyone. "Get Started" conditionally redirects.
   if (!started) return (
     <>
       <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center px-6 relative overflow-hidden">
@@ -1720,6 +1661,7 @@ function App() {
     </>
   );
 
+  // AUTH GUARD — user clicked "Go to Dashboard" but has no session
   if (!session) return (
     <>
       <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center px-6 relative overflow-hidden">
@@ -1748,8 +1690,10 @@ function App() {
     </>
   );
 
+  // Authenticated — VIP welcome overlay (new users only)
   if (showWelcome) return <VipWelcomeOverlay onBegin={beginTour} />;
 
+  // Feature tour steps
   if (tourStep >= 0) return (
     <TourFeatureStep
       step={tourStep}
