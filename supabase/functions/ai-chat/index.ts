@@ -49,7 +49,6 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!response.ok) {
-      const errText = await response.text();
       return new Response(JSON.stringify({ error: `AI service error: ${response.status}` }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
