@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabaseClient';
-import { signIn, signUp, signInWithGoogle, signInWithLinkedIn, signOut, getSession, onAuthStateChange } from './lib/auth';
+import { signIn, signUp, signInWithGoogle, signInWithLinkedIn, signOut, getSession, onAuthStateChange, isValidEmail, getDisplayName, getInitial } from './lib/auth';
 import { fetchProfile, type Profile } from './lib/profile';
 import { saveAndGenerateResume, downloadResumeAsPDF } from './lib/resume';
 import type { Session } from '@supabase/supabase-js';
-import { Home, Bot, PenTool, Wrench, Settings, Shield, Search, Send, ChevronRight, Star, Gift, Flame, Trophy, FileText, RefreshCw, FileEdit, DollarSign, Download, Sparkles, Target, TrendingUp, X, Briefcase, ArrowLeft, Plus, Mic, Palette, LayoutTemplate, User, BookOpen, Clock, Brain, BarChart3, LockKeyhole, HelpCircle, SkipForward, Mail, Link2, Image, FileUp, Cloud, Lightbulb, Compass, Loader2, Check } from 'lucide-react';
+import { Home, Bot, PenTool, Wrench, Settings, Shield, Search, Send, ChevronRight, Star, Gift, Flame, Trophy, FileText, RefreshCw, FileEdit, DollarSign, Download, Sparkles, Target, TrendingUp, X, Briefcase, ArrowLeft, Plus, Mic, Palette, LayoutTemplate, User, BookOpen, Clock, Brain, BarChart3, LockKeyhole, HelpCircle, SkipForward, Mail, Link2, Image, FileUp, Cloud, Lightbulb, Compass, Loader2, Check, Zap, Award, Play, Lock } from 'lucide-react';
 
 // Simple Vertical Falling Sparks - Soft Cyan/Blue
 const SparksBackground = () => {
@@ -68,10 +68,8 @@ const VipDiamondLogo = ({ size = 120 }: { size?: number }) => {
           </linearGradient>
           <filter id="blueGlow"><feGaussianBlur stdDeviation="3" /></filter>
         </defs>
-        {/* Outer diamond */}
         <path d="M60 10 L110 45 L60 110 L10 45 Z" stroke="rgba(34,211,238,0.3)" strokeWidth="2" fill="rgba(34,211,238,0.05)" />
         <path d="M60 10 L110 45 L60 110 L10 45 Z" stroke="url(#electricBlue)" strokeWidth="2" filter="url(#blueGlow)" />
-        {/* Inner facets */}
         <path d="M60 10 L60 45" stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
         <path d="M10 45 L60 45 L110 45" stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
         <path d="M60 10 L35 45" stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
@@ -106,6 +104,7 @@ const AuthModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
 
   const handleEmailAuth = async (isSignUp: boolean) => {
     if (!email.trim() || !password.trim()) { setError('Please enter both email and password.'); return; }
+    if (!isValidEmail(email)) { setError('Please enter a valid email address (e.g., you@example.com).'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setLoading(true);
     setError('');
@@ -160,11 +159,11 @@ const AuthModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(false)} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(false)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(''); }} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(false)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <button onClick={() => handleEmailAuth(false)} disabled={loading} className="w-full py-3.5 rounded-2xl font-medium text-white bg-gradient-to-r from-blue-600 to-cyan-600 border border-cyan-400/20 hover:scale-[1.01] transition-transform shadow-lg shadow-cyan-500/20 disabled:opacity-60 disabled:scale-100 flex items-center justify-center gap-2">
               {loading ? <Spinner className="w-5 h-5" /> : 'Log In'}
@@ -180,11 +179,11 @@ const AuthModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} placeholder="you@example.com" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1.5">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(true)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
+              <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(''); }} onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth(true)} placeholder="At least 6 characters" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/40 focus:border-cyan-500/50 outline-none transition-colors" />
             </div>
             <button onClick={() => handleEmailAuth(true)} disabled={loading} className="w-full py-3.5 rounded-2xl font-semibold text-black bg-gradient-to-r from-cyan-400 to-cyan-500 border border-cyan-400/30 hover:scale-[1.01] transition-transform shadow-lg shadow-cyan-500/20 disabled:opacity-60 disabled:scale-100 flex items-center justify-center gap-2">
               {loading ? <Spinner className="w-5 h-5 border-cyan-400/30 border-t-cyan-400" /> : 'Create New Account'}
@@ -257,7 +256,7 @@ const Header = ({ onProfile, onSettings, title, subtitle, hideTicker, profile, s
           </div>
           <div className="flex items-center gap-2">
             <button onClick={onProfile} className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center ring-2 ring-cyan-400/20 hover:scale-105 transition-transform shadow-lg shadow-cyan-400/20">
-              <span className="text-black font-bold text-sm">{profile?.full_name?.charAt(0)?.toUpperCase() || (session?.user?.email?.charAt(0)?.toUpperCase() ?? 'U')}</span>
+              <span className="text-black font-bold text-sm">{getInitial(session, profile)}</span>
             </button>
             <button onClick={onSettings} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-cyan-400/20 hover:border-cyan-400/30 transition-all">
               <Settings className="w-5 h-5 text-cyan-400" />
@@ -316,7 +315,6 @@ const VipWelcomeOverlay = ({ onBegin }: { onBegin: () => void }) => {
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[180px] animate-glow-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-600/8 rounded-full blur-[160px]" />
 
-      {/* Expanding rings behind diamond */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="absolute w-48 h-48 -translate-x-1/2 -translate-y-1/2 border border-cyan-400/20 rounded-full animate-ring-expand" />
         <div className="absolute w-48 h-48 -translate-x-1/2 -translate-y-1/2 border border-cyan-400/20 rounded-full animate-ring-expand" style={{ animationDelay: '1s' }} />
@@ -413,9 +411,9 @@ const ProfileModal = ({ onClose, profile, session }: { onClose: () => void; prof
       </div>
       <div className="flex flex-col items-center">
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center ring-4 ring-cyan-400/20 shadow-xl shadow-cyan-400/20">
-          <span className="text-black font-bold text-3xl">{profile?.full_name?.charAt(0)?.toUpperCase() || (session?.user?.email?.charAt(0)?.toUpperCase() ?? 'U')}</span>
+          <span className="text-black font-bold text-3xl">{getInitial(session, profile)}</span>
         </div>
-        <h3 className="text-white font-semibold text-xl mt-4">{profile?.full_name || 'Your Name'}</h3>
+        <h3 className="text-white font-semibold text-xl mt-4">{getDisplayName(session, profile)}</h3>
         <p className="text-white/40 text-sm">{session?.user?.email || 'No email'}</p>
         {profile?.profession && <p className="text-cyan-400/80 text-sm mt-1">{profile.profession}</p>}
         <div className="flex gap-8 mt-6">
@@ -434,6 +432,60 @@ const ProfileModal = ({ onClose, profile, session }: { onClose: () => void; prof
     </div>
   </div>
 );
+
+// Learning progress hook with localStorage persistence
+function useLearningProgress(userId: string | undefined) {
+  const storageKey = `skillglint_progress_${userId || 'guest'}`;
+  const [progress, setProgress] = useState<Record<string, number>>({});
+  const [checkedIn, setCheckedIn] = useState(false);
+  const [streak, setStreak] = useState(7);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const data = JSON.parse(saved);
+        setProgress(data.progress || {});
+        setCheckedIn(data.checkedIn || false);
+        setStreak(data.streak || 7);
+      }
+    } catch { /* ignore parse errors */ }
+  }, [storageKey]);
+
+  const save = (newProgress: Record<string, number>, newCheckedIn: boolean, newStreak: number) => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ progress: newProgress, checkedIn: newCheckedIn, streak: newStreak }));
+    } catch { /* ignore */ }
+  };
+
+  const updateCourseProgress = (courseTitle: string, value: number) => {
+    const newProgress = { ...progress, [courseTitle]: Math.min(100, Math.max(0, value)) };
+    setProgress(newProgress);
+    save(newProgress, checkedIn, streak);
+  };
+
+  const completeCourse = (courseTitle: string) => {
+    const newProgress = { ...progress, [courseTitle]: 100 };
+    setProgress(newProgress);
+    save(newProgress, checkedIn, streak);
+  };
+
+  const checkIn = () => {
+    if (checkedIn) return;
+    const newCheckedIn = true;
+    const newStreak = streak + 1;
+    setCheckedIn(newCheckedIn);
+    setStreak(newStreak);
+    save(progress, newCheckedIn, newStreak);
+  };
+
+  const resetCheckIn = () => {
+    setCheckedIn(false);
+    save(progress, false, streak);
+  };
+
+  return { progress, checkedIn, streak, updateCourseProgress, completeCourse, checkIn, resetCheckIn };
+}
 
 const IncomeGoalTracker = () => {
   const [target, setTarget] = useState(1000);
@@ -504,6 +556,25 @@ const SettingsModal = ({ onClose, onSignOut }: { onClose: () => void; onSignOut:
   );
 };
 
+// Sample data for courses and jobs
+const SAMPLE_COURSES = [
+  { title: 'Copy-Paste Mastery', lessons: 8, icon: FileText, baseProgress: 0 },
+  { title: 'Canva Design Pro', lessons: 12, icon: Palette, baseProgress: 0 },
+  { title: 'AI Tools Bootcamp', lessons: 10, icon: Brain, baseProgress: 0 },
+  { title: 'Freelance Success', lessons: 15, icon: Briefcase, baseProgress: 0 },
+  { title: 'Data Entry Pro', lessons: 6, icon: BarChart3, baseProgress: 0 },
+  { title: 'Content Writing', lessons: 9, icon: BookOpen, baseProgress: 0 },
+];
+
+const SAMPLE_JOBS = [
+  { title: 'Data Entry Specialist', company: 'TechFlow', pay: '$22/hr', rating: 4.8 },
+  { title: 'Virtual Assistant', company: 'RemoteFirst', pay: '$25/hr', rating: 4.6 },
+  { title: 'Social Media Designer', company: 'CreativeHub', pay: '$30/hr', rating: 4.9 },
+  { title: 'AI Trainer', company: 'NeuralAI', pay: '$40/hr', rating: 4.7 },
+  { title: 'Content Writer', company: 'WriteHub', pay: '$28/hr', rating: 4.5 },
+  { title: 'Freelance PM', company: 'Upwork Pro', pay: '$32/hr', rating: 4.8 },
+];
+
 // Career Insight Card - AI-analyzed job recommendations based on course progress
 const CareerInsightCard = ({ courses }: { courses: { title: string; progress: number; icon: React.ElementType }[] }) => {
   const completed = courses.filter(c => c.progress >= 100);
@@ -535,7 +606,7 @@ const CareerInsightCard = ({ courses }: { courses: { title: string; progress: nu
       {topJobs.length > 0 ? (
         <div className="mt-4 space-y-2.5">
           {topJobs.map((job, i) => (
-            <div key={i} className="flex items-center gap-3 bg/black/25 rounded-xl p-3.5 border border-white/5 hover:border-cyan-400/20 hover:bg-black/40 transition-all duration-300 cursor-pointer group">
+            <div key={i} className="flex items-center gap-3 bg-black/25 rounded-xl p-3.5 border border-white/5 hover:border-cyan-400/20 hover:bg-black/40 transition-all duration-300 cursor-pointer group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400/15 to-blue-500/15 flex items-center justify-center flex-shrink-0"><Briefcase className="w-5 h-5 text-cyan-400/70" /></div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2"><p className="text-white text-sm font-medium truncate">{job.title}</p>{job.match >= 90 && <span className="px-1.5 py-0.5 bg-cyan-400/15 text-cyan-400 text-[10px] font-medium rounded-md flex-shrink-0">{job.tag}</span>}</div>
@@ -547,10 +618,18 @@ const CareerInsightCard = ({ courses }: { courses: { title: string; progress: nu
           <p className="text-white/30 text-xs text-center pt-1">Complete more courses to unlock better matches</p>
         </div>
       ) : (
-        <div className="mt-4 flex flex-col items-center py-6 text-center">
-          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3"><Compass className="w-6 h-6 text-white/30" /></div>
-          <p className="text-white/50 text-sm">Stay tuned, we are finding the best matches for you</p>
-          <p className="text-white/30 text-xs mt-1">Start a course to unlock personalized job recommendations</p>
+        <div className="mt-4 space-y-2.5">
+          {SAMPLE_JOBS.slice(0, 3).map((job, i) => (
+            <div key={i} className="flex items-center gap-3 bg-black/25 rounded-xl p-3.5 border border-white/5 hover:border-cyan-400/20 hover:bg-black/40 transition-all duration-300 cursor-pointer group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400/15 to-blue-500/15 flex items-center justify-center flex-shrink-0"><Briefcase className="w-5 h-5 text-cyan-400/70" /></div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">{job.title}</p>
+                <p className="text-white/40 text-xs mt-0.5">{job.company} · {job.pay}</p>
+              </div>
+              <div className="flex flex-col items-end flex-shrink-0"><div className="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-cyan-400/50 to-blue-500/50 rounded-full" style={{ width: '70%' }} /></div><span className="text-cyan-400/60 text-xs font-medium mt-1">70%</span></div>
+            </div>
+          ))}
+          <p className="text-white/30 text-xs text-center pt-1">Start a course to unlock personalized job recommendations</p>
         </div>
       )}
     </div>
@@ -567,7 +646,14 @@ const EmptyState = ({ icon: Icon, title, desc, action }: { icon: React.ElementTy
   </div>
 );
 
-// AI Assistant Attachment Menu - solid dark background for readability
+// Coming Soon badge
+const ComingSoonBadge = () => (
+  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-400/10 border border-amber-400/20 rounded-full text-amber-400 text-xs font-medium">
+    <Clock className="w-3 h-3" /> Coming Soon
+  </span>
+);
+
+// AI Assistant Attachment Menu
 const AIAttachMenu = ({ onClose, onSelect }: { onClose: () => void; onSelect: (label: string) => void }) => {
   const options = [
     { icon: FileUp, label: 'Upload Resume (PDF/Doc)', desc: 'Share your resume for analysis' },
@@ -590,13 +676,13 @@ const AIAttachMenu = ({ onClose, onSelect }: { onClose: () => void; onSelect: (l
   );
 };
 
-const ToolCard = ({ icon: Icon, title, desc, onClick }: { icon: React.ElementType; title: string; desc: string; onClick: () => void }) => (
+const ToolCard = ({ icon: Icon, title, desc, onClick, badge }: { icon: React.ElementType; title: string; desc: string; onClick: () => void; badge?: string }) => (
   <button onClick={onClick} className="flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-5 hover:border-cyan-400/30 hover:scale-[1.01] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/10 transition-all duration-300 text-left w-full group">
     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
       <Icon className="w-7 h-7 text-cyan-400" />
     </div>
     <div className="flex-1 min-w-0"><h3 className="text-white font-medium text-lg">{title}</h3><p className="text-white/50 text-sm">{desc}</p></div>
-    <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all flex-shrink-0" />
+    {badge ? <ComingSoonBadge /> : <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all flex-shrink-0" />}
   </button>
 );
 
@@ -629,31 +715,13 @@ const FullScreenTool = ({ title, icon: Icon, onBack, children }: { title: string
   </div>
 );
 
-const HomeView = ({ onProfile, onSettings, onNavigate, profile, session }: { onProfile: () => void; onSettings: () => void; onNavigate: (tab: string, tool?: string) => void; profile: Profile | null; session: Session | null }) => {
-  const [streak] = useState(7);
-  const [checkedIn, setCheckedIn] = useState(false);
-  const [jobs, setJobs] = useState<{ title: string; company: string; pay: string; rating: number }[]>([]);
-  const [courses, setCourses] = useState<{ title: string; lessons: number; progress: number; icon: React.ElementType }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const [jobsRes, coursesRes] = await Promise.all([
-        supabase.from('jobs').select('title, company, pay, rating').order('created_at', { ascending: false }),
-        supabase.from('courses').select('title, lessons, progress, icon_name').order('created_at', { ascending: false }),
-      ]);
-      if (jobsRes.error || coursesRes.error) { setError(true); setLoading(false); return; }
-      const iconByName: Record<string, React.ElementType> = { FileText, Palette, Brain, Trophy, BookOpen };
-      setJobs(jobsRes.data || []);
-      setCourses((coursesRes.data || []).map(c => ({ title: c.title, lessons: c.lessons, progress: c.progress, icon: iconByName[c.icon_name] || BookOpen })));
-      setLoading(false);
-    })();
-  }, []);
+const HomeView = ({ onProfile, onSettings, onNavigate, profile, session, learning }: { onProfile: () => void; onSettings: () => void; onNavigate: (tab: string, tool?: string) => void; profile: Profile | null; session: Session | null; learning: ReturnType<typeof useLearningProgress> }) => {
+  const { progress, checkedIn, streak, checkIn } = learning;
+  const courses = SAMPLE_COURSES.map(c => ({ ...c, progress: progress[c.title] || c.baseProgress }));
 
   return (
     <>
-      <Header onProfile={onProfile} onSettings={onSettings} title={profile?.full_name || session?.user?.email || 'Welcome'} subtitle={profile?.profession || 'Welcome back'} profile={profile} session={session} />
+      <Header onProfile={onProfile} onSettings={onSettings} title={getDisplayName(session, profile)} subtitle={profile?.profession || 'Welcome back'} profile={profile} session={session} />
       <main className="px-4 py-5 max-w-2xl mx-auto space-y-5 pb-24 relative z-10">
         <div className="absolute top-20 left-0 w-72 h-72 bg-indigo-600/5 rounded-full blur-[80px]" />
         <div className="absolute bottom-40 right-0 w-80 h-80 bg-cyan-600/5 rounded-full blur-[100px]" />
@@ -668,7 +736,7 @@ const HomeView = ({ onProfile, onSettings, onNavigate, profile, session }: { onP
               </div>
               <div><p className="text-white font-medium">Daily Check-in</p><p className="text-white/50 text-sm flex items-center gap-1"><Flame className="w-3 h-3 text-orange-400" />{streak} day streak</p></div>
             </div>
-            <button onClick={() => setCheckedIn(true)} disabled={checkedIn} className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 hover:scale-[1.03] active:scale-[0.96] ${checkedIn ? 'bg-white/10 text-white/40' : 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black shadow-lg shadow-cyan-400/25 hover:shadow-cyan-400/40'}`}>
+            <button onClick={checkIn} disabled={checkedIn} className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 hover:scale-[1.03] active:scale-[0.96] ${checkedIn ? 'bg-white/10 text-white/40' : 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black shadow-lg shadow-cyan-400/25 hover:shadow-cyan-400/40'}`}>
               {checkedIn ? 'Claimed' : 'Check In'}
             </button>
           </div>
@@ -683,21 +751,13 @@ const HomeView = ({ onProfile, onSettings, onNavigate, profile, session }: { onP
             <button className="text-cyan-400 text-xs font-medium">View All</button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {loading ? (
-              <div className="col-span-full flex items-center justify-center py-8"><span className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full" style={{ animation: 'spin 0.6s linear infinite' }} /></div>
-            ) : error ? (
-              <div className="col-span-full text-center py-8 text-white/40 text-sm">Unable to load jobs. Please try again later.</div>
-            ) : jobs.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-white/40 text-sm">No jobs available right now. Check back soon!</div>
-            ) : (
-              jobs.map((j, i) => (
-                <div key={i} className="bg-black/30 backdrop-blur rounded-2xl p-4 border border-white/5 hover:border-cyan-400/30 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/10 transition-all duration-300 cursor-pointer group">
-                  <p className="text-white text-sm font-medium">{j.title}</p>
-                  <p className="text-white/40 text-xs mt-0.5">{j.company}</p>
-                  <div className="flex justify-between mt-3"><span className="text-cyan-400 font-semibold text-sm">{j.pay}</span><span className="text-white/40 text-xs flex items-center gap-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />{j.rating}</span></div>
-                </div>
-              ))
-            )}
+            {SAMPLE_JOBS.map((j, i) => (
+              <div key={i} className="bg-black/30 backdrop-blur rounded-2xl p-4 border border-white/5 hover:border-cyan-400/30 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/10 transition-all duration-300 cursor-pointer group">
+                <p className="text-white text-sm font-medium">{j.title}</p>
+                <p className="text-white/40 text-xs mt-0.5">{j.company}</p>
+                <div className="flex justify-between mt-3"><span className="text-cyan-400 font-semibold text-sm">{j.pay}</span><span className="text-white/40 text-xs flex items-center gap-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />{j.rating}</span></div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -712,26 +772,22 @@ const HomeView = ({ onProfile, onSettings, onNavigate, profile, session }: { onP
             <button onClick={() => onNavigate('courses')} className="text-cyan-400 text-xs font-medium">All Courses</button>
           </div>
           <div className="space-y-3">
-            {loading ? (
-              <div className="flex items-center justify-center py-8"><span className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full" style={{ animation: 'spin 0.6s linear infinite' }} /></div>
-            ) : error ? (
-              <div className="text-center py-8 text-white/40 text-sm">Unable to load courses. Please try again later.</div>
-            ) : courses.length === 0 ? (
-              <div className="text-center py-8 text-white/40 text-sm">No courses available yet. Check back soon!</div>
-            ) : (
-              courses.slice(0, 3).map((c, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 bg-black/30 rounded-xl border border-white/5 hover:border-cyan-400/20 transition-colors cursor-pointer">
-                  <c.icon className="w-8 h-8 text-cyan-400/60" />
-                  <div className="flex-1"><p className="text-white text-sm font-medium">{c.title}</p><p className="text-white/40 text-xs">{c.lessons} lessons</p></div>
-                  {c.progress > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-cyan-400 rounded-full" style={{ width: `${c.progress}%` }} /></div>
-                      <span className="text-white/40 text-xs">{c.progress}%</span>
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
+            {courses.slice(0, 3).map((c, i) => (
+              <div key={i} className="flex items-center gap-4 p-3 bg-black/30 rounded-xl border border-white/5 hover:border-cyan-400/20 transition-colors cursor-pointer">
+                <c.icon className="w-8 h-8 text-cyan-400/60" />
+                <div className="flex-1"><p className="text-white text-sm font-medium">{c.title}</p><p className="text-white/40 text-xs">{c.lessons} lessons</p></div>
+                {c.progress > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-cyan-400 rounded-full" style={{ width: `${c.progress}%` }} /></div>
+                    <span className="text-white/40 text-xs">{c.progress}%</span>
+                  </div>
+                ) : (
+                  <button onClick={() => onNavigate('courses')} className="px-3 py-1.5 bg-cyan-400/10 border border-cyan-400/20 rounded-lg text-cyan-400 text-xs font-medium hover:bg-cyan-400/20 transition-colors flex items-center gap-1">
+                    <Play className="w-3 h-3" /> Start
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </main>
@@ -739,7 +795,33 @@ const HomeView = ({ onProfile, onSettings, onNavigate, profile, session }: { onP
   );
 };
 
-const AIAssistantView = ({ onProfile, onSettings }: { onProfile: () => void; onSettings: () => void }) => {
+// Simulated AI response generator
+function generateAIResponse(input: string, tone: string): string {
+  const lower = input.toLowerCase();
+  const toneIntro = tone === 'Creative' ? "Here's a creative take on that" : tone === 'Technical' ? "From a technical perspective" : "Here's my professional analysis";
+
+  if (lower.includes('resume') || lower.includes('cv')) {
+    return `${toneIntro}: Your resume should highlight quantifiable achievements. For example, instead of "managed data entry," use "Processed 500+ records daily with 99.8% accuracy." Key tips:\n\n1. Use ATS-friendly keywords from the job description\n2. Keep it to 1-2 pages maximum\n3. Start bullet points with action verbs\n4. Include metrics and numbers wherever possible\n\nWould you like me to help you build one with the Resume Builder tool?`;
+  }
+  if (lower.includes('job') || lower.includes('career')) {
+    return `${toneIntro}: Based on current market trends, here are high-demand freelance skills:\n\n1. Data Entry & Virtual Assistance ($18-25/hr)\n2. Content Writing ($25-35/hr)\n3. Social Media Design ($30-45/hr)\n4. AI Prompt Engineering ($40-60/hr)\n\nI recommend starting with the "Freelance Success" course to build your foundation. Your skill profile suggests you'd excel in data-focused roles.`;
+  }
+  if (lower.includes('skill') || lower.includes('learn')) {
+    return `${toneIntro}: Here's a personalized learning roadmap for you:\n\n1. Start with "Copy-Paste Mastery" — fundamentals of remote work\n2. Move to "Data Entry Pro" — build speed and accuracy\n3. Take "Freelance Success" — learn to find clients\n4. Add "AI Tools Bootcamp" — stay ahead of the curve\n\nEach course takes 2-4 hours. Complete the daily check-in to maintain your streak!`;
+  }
+  if (lower.includes('salary') || lower.includes('rate') || lower.includes('pay')) {
+    return `${toneIntro}: For competitive freelance pricing:\n\n- Beginner: $15-20/hr (first 3 months)\n- Intermediate: $25-35/hr (6-12 months experience)\n- Expert: $40-60/hr (1+ year with portfolio)\n\nUse the Currency Converter in Utilities to calculate rates in PKR. Don't undervalue your work — start at $20/hr minimum and negotiate up.`;
+  }
+  if (lower.includes('proposal') || lower.includes('cover letter')) {
+    return `${toneIntro}: A winning proposal has 3 parts:\n\n1. Hook — Reference something specific from their job post\n2. Value — Show how you solve their problem (with examples)\n3. CTA — End with a clear next step\n\nTry the Cover Letter Writer in Writer Tools — it generates a tailored letter from any job description in seconds.`;
+  }
+  if (lower.includes('linkedin')) {
+    return `${toneIntro}: To optimize your LinkedIn profile:\n\n1. Professional headshot (clear, well-lit)\n2. Compelling headline: "Freelance [Role] | Helping [target audience]"\n3. Summary with keywords recruiters search for\n4. Add skills and get endorsements\n5. Post regularly about your work\n\nUse the LinkedIn Optimizer tool for AI-powered suggestions.`;
+  }
+  return `${toneIntro}: That's a great question! Here's what I recommend:\n\n1. Start with the courses in the "Continue Learning" section on your dashboard\n2. Use the Writer Tools to build your resume and cover letters\n3. Check the Scam Alert tool before joining any new platform\n4. Track your daily progress with check-ins\n\nIs there a specific area you'd like to dive deeper into?`;
+}
+
+const AIAssistantView = ({ onProfile, onSettings, session, profile }: { onProfile: () => void; onSettings: () => void; session: Session | null; profile: Profile | null }) => {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState('');
   const [tone, setTone] = useState('Professional');
@@ -747,23 +829,67 @@ const AIAssistantView = ({ onProfile, onSettings }: { onProfile: () => void; onS
   const [loading, setLoading] = useState(false);
   const [showAttach, setShowAttach] = useState(false);
   const [attachLabel, setAttachLabel] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const tones = ['Professional', 'Creative', 'Technical'];
   const templates = ['Write a compelling job proposal', 'Optimize my LinkedIn profile', 'Generate a cold email', 'Create a project timeline', 'Analyze my skill gaps'];
   const actions = ['Data Entry Market', 'Freelance Strategy', 'Skill Roadmap', 'Fix My Resume', 'Job Search Tips', 'Salary Negotiation'];
 
   useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [messages, loading]);
+
   const sendMessage = (text: string) => {
     if (!text.trim() || loading) return;
-    setMessages(m => [...m, { role: 'user', content: text }]);
+    const userMsg = text.trim();
+    if (attachLabel) {
+      setMessages(m => [...m, { role: 'user', content: `${userMsg}\n\n[Attachment: ${attachLabel}]` }]);
+      setAttachLabel('');
+    } else {
+      setMessages(m => [...m, { role: 'user', content: userMsg }]);
+    }
     setInput('');
     setLoading(true);
-    setTimeout(() => { setMessages(m => [...m, { role: 'assistant', content: `I am analyzing your query... Here's what I found for "${text}" — let me break this down with a ${tone.toLowerCase()} approach.` }]); setLoading(false); }, 800);
+
+    (async () => {
+      let response = '';
+      try {
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ message: userMsg, tone }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          response = data.content || generateAIResponse(userMsg, tone);
+        } else {
+          response = generateAIResponse(userMsg, tone);
+        }
+      } catch {
+        response = generateAIResponse(userMsg, tone);
+      }
+      setMessages(m => [...m, { role: 'assistant', content: response }]);
+      setLoading(false);
+    })();
+  };
+
+  const handleFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAttachLabel(`${file.name} (${(file.size / 1024).toFixed(0)} KB)`);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#0B0F19] flex flex-col relative">
       <SparksBackground />
+      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" onChange={handleFileSelected} className="hidden" />
       <header className="sticky top-0 bg-[#0B0F19]/90 backdrop-blur-xl border-b border-white/5 z-20">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
@@ -771,7 +897,7 @@ const AIAssistantView = ({ onProfile, onSettings }: { onProfile: () => void; onS
             <span className="text-white font-medium">AI Assistant</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={onProfile} className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center ring-2 ring-cyan-400/20 text-black font-bold text-sm">HK</button>
+            <button onClick={onProfile} className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center ring-2 ring-cyan-400/20 text-black font-bold text-sm">{getInitial(session, profile)}</button>
             <button onClick={onSettings} className="w-9 h-9 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-cyan-400/20 transition-all"><Settings className="w-4 h-4 text-cyan-400" /></button>
           </div>
         </div>
@@ -803,7 +929,7 @@ const AIAssistantView = ({ onProfile, onSettings }: { onProfile: () => void; onS
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2" strokeLinejoin="round"><path d="M12 2 L22 9 L12 22 L2 9 Z" /></svg>
                   </div>
                 )}
-                <div className={`max-w-[80%] rounded-2xl px-5 py-3.5 ${m.role === 'user' ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black font-medium' : 'bg-white/5 backdrop-blur border border-white/5 text-white'}`}>{m.content}</div>
+                <div className={`max-w-[80%] rounded-2xl px-5 py-3.5 whitespace-pre-line ${m.role === 'user' ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black font-medium' : 'bg-white/5 backdrop-blur border border-white/5 text-white'}`}>{m.content}</div>
               </div>
             ))}
             {loading && (
@@ -844,10 +970,10 @@ const AIAssistantView = ({ onProfile, onSettings }: { onProfile: () => void; onS
             )}
             <div className="relative flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-xl shadow-black/40">
               <div className="relative">
-                {showAttach && <AIAttachMenu onClose={() => setShowAttach(false)} onSelect={(label) => setAttachLabel(label)} />}
+                {showAttach && <AIAttachMenu onClose={() => setShowAttach(false)} onSelect={(label) => { if (label.includes('Upload')) handleFileUpload(); else setAttachLabel(label); }} />}
                 <button onClick={() => setShowAttach(!showAttach)} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showAttach ? 'text-cyan-400 bg-cyan-400/15' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}><Plus className={`w-5 h-5 transition-transform duration-300 ${showAttach ? 'rotate-45' : ''}`} /></button>
               </div>
-              <button className="w-10 h-10 rounded-xl flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"><Mic className="w-5 h-5" /></button>
+              <button onClick={handleFileUpload} className="w-10 h-10 rounded-xl flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"><Mic className="w-5 h-5" /></button>
               <input value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && sendMessage(input)} placeholder="Ask about career, resumes, or skills..." className="flex-1 bg-transparent px-2 py-2.5 text-white text-sm placeholder-white/40 outline-none" />
               <button onClick={() => sendMessage(input)} disabled={loading || !input.trim()} className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-cyan-400/30 hover:scale-105 active:scale-95 transition-transform disabled:opacity-40 disabled:scale-100"><Send className="w-5 h-5 text-black" /></button>
             </div>
@@ -864,6 +990,12 @@ const WriterToolsView = ({ onProfile, onSettings, activeTool, setActiveTool }: {
   const [jobDesc, setJobDesc] = useState('');
   const [spun, setSpun] = useState('');
   const [cover, setCover] = useState('');
+  const [linkedinInput, setLinkedinInput] = useState('');
+  const [linkedinResult, setLinkedinResult] = useState('');
+  const [portfolioInput, setPortfolioInput] = useState({ name: '', role: '', skills: '' });
+  const [portfolioResult, setPortfolioResult] = useState('');
+  const [proposalInput, setProposalInput] = useState({ project: '', budget: '', timeline: '' });
+  const [proposalResult, setProposalResult] = useState('');
   const [resumeGenerating, setResumeGenerating] = useState(false);
   const [resumeResult, setResumeResult] = useState<{ id: string; generatedContent: string } | null>(null);
   const [resumeError, setResumeError] = useState('');
@@ -920,10 +1052,28 @@ const WriterToolsView = ({ onProfile, onSettings, activeTool, setActiveTool }: {
           <div className="space-y-4">
             <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
               <textarea value={textToSpin} onChange={(e) => setTextToSpin(e.target.value)} placeholder="Paste your article, blog post, or content here to spin..." rows={6} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none resize-none transition-colors" />
-              <button onClick={() => setSpun(textToSpin.split(' ').reverse().join(' '))} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+              <button onClick={() => {
+                if (!textToSpin.trim()) return;
+                const sentences = textToSpin.split('. ').map(s => {
+                  const words = s.split(' ');
+                  if (words.length > 4) return words.reverse().join(' ');
+                  return s;
+                });
+                setSpun(sentences.join('. '));
+              }} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
                 <RefreshCw className="w-5 h-5" /> Spin Text Now
               </button>
-              {spun && <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl text-white/80">{spun}</div>}
+              {spun && (
+                <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-cyan-400 text-sm font-medium flex items-center gap-1.5"><Check className="w-4 h-4" /> Spun Content</span>
+                    <button onClick={() => { navigator.clipboard?.writeText(spun); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-400/20 border border-cyan-400/30 rounded-lg text-cyan-400 text-xs hover:bg-cyan-400/30 transition-colors">
+                      <Download className="w-3.5 h-3.5" /> Copy
+                    </button>
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed">{spun}</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -931,35 +1081,175 @@ const WriterToolsView = ({ onProfile, onSettings, activeTool, setActiveTool }: {
           <div className="space-y-4">
             <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
               <textarea value={jobDesc} onChange={(e) => setJobDesc(e.target.value)} placeholder="Paste the full job description here..." rows={5} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none resize-none transition-colors" />
-              <button onClick={() => setCover(`Dear Hiring Manager,\n\nI am thrilled to apply for this opportunity. With my expertise in ${jobDesc.slice(0, 40)}..., I am confident I can deliver exceptional results.\n\nKey achievements:\n- 5+ years relevant experience\n- Proven track record of success\n- Strong communication skills\n\nI look forward to discussing how I can contribute.\n\nBest regards,\nHassaan Khan`)} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+              <button onClick={() => {
+                if (!jobDesc.trim()) return;
+                const keywords = jobDesc.split(' ').slice(0, 5).join(', ');
+                setCover(`Dear Hiring Manager,
+
+I am excited to apply for this opportunity. After reviewing the job description, I am confident that my skills in ${keywords} align perfectly with your requirements.
+
+Key Qualifications:
+- Proven experience in relevant field with measurable results
+- Strong communication and collaboration skills
+- Self-motivated with a track record of delivering quality work on time
+- Adaptable and quick to learn new tools and processes
+
+I am particularly drawn to this role because it offers the opportunity to contribute meaningfully while growing professionally. I am available to start immediately and can work across time zones.
+
+I would welcome the chance to discuss how my background can benefit your team. Thank you for your consideration.
+
+Best regards,
+${resume.name || 'Your Name'}`);
+              }} className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
                 <Sparkles className="w-5 h-5" /> Generate Cover Letter
               </button>
-              {cover && <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl text-white/80 whitespace-pre-line">{cover}</div>}
+              {cover && (
+                <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-cyan-400 text-sm font-medium flex items-center gap-1.5"><Check className="w-4 h-4" /> Cover Letter Generated</span>
+                    <button onClick={() => navigator.clipboard?.writeText(cover)} className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-400/20 border border-cyan-400/30 rounded-lg text-cyan-400 text-xs hover:bg-cyan-400/30 transition-colors">
+                      <Download className="w-3.5 h-3.5" /> Copy
+                    </button>
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{cover}</p>
+                </div>
+              )}
             </div>
           </div>
         )}
         {activeTool === 'linkedin' && (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6 text-center">
-            <User className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
-            <h3 className="text-white font-medium mb-2">LinkedIn Optimization</h3>
-            <p className="text-white/50 text-sm">Connect your LinkedIn to optimize your profile with AI suggestions.</p>
-            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-xl text-black font-medium">Connect LinkedIn</button>
+          <div className="space-y-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
+              <p className="text-white/50 text-sm mb-4">Paste your current LinkedIn headline and summary to get AI-powered optimization suggestions.</p>
+              <input value={linkedinInput} onChange={(e) => setLinkedinInput(e.target.value)} placeholder="Current headline (e.g., 'Looking for work')" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors mb-3" />
+              <button onClick={() => {
+                if (!linkedinInput.trim()) return;
+                setLinkedinResult(`Optimized Headline: "${linkedinInput} | Freelance Professional | Delivering Quality Results"
+
+Profile Improvements:
+1. Add a professional photo — profiles with photos get 21x more views
+2. Write a compelling "About" section with your top 3 skills
+3. Add relevant skills: Data Entry, Virtual Assistance, Content Writing
+4. Request endorsements from colleagues and clients
+5. Post weekly about your projects and learnings
+6. Join 5-10 relevant groups in your industry
+7. Use the "Open to Work" feature for recruiter visibility
+
+Key Keywords to Add: Remote Work, Freelance, Data Entry, Virtual Assistant, Time Management, Communication, Microsoft Office, Google Workspace`);
+              }} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+                <Sparkles className="w-5 h-5" /> Optimize My Profile
+              </button>
+              {linkedinResult && (
+                <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl">
+                  <span className="text-cyan-400 text-sm font-medium flex items-center gap-1.5 mb-2"><Check className="w-4 h-4" /> Optimization Results</span>
+                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{linkedinResult}</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
         {activeTool === 'portfolio' && (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6 text-center">
-            <Briefcase className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
-            <h3 className="text-white font-medium mb-2">Portfolio Generator</h3>
-            <p className="text-white/50 text-sm">Create a stunning portfolio website in minutes.</p>
-            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-xl text-black font-medium">Start Building</button>
+          <div className="space-y-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
+              <div className="space-y-4">
+                <input value={portfolioInput.name} onChange={(e) => setPortfolioInput({ ...portfolioInput, name: e.target.value })} placeholder="Your Name" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                <input value={portfolioInput.role} onChange={(e) => setPortfolioInput({ ...portfolioInput, role: e.target.value })} placeholder="Your Role (e.g., Data Entry Specialist)" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                <input value={portfolioInput.skills} onChange={(e) => setPortfolioInput({ ...portfolioInput, skills: e.target.value })} placeholder="Top skills (comma separated)" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                <button onClick={() => {
+                  if (!portfolioInput.name.trim()) return;
+                  const skills = portfolioInput.skills.split(',').map(s => s.trim()).filter(Boolean);
+                  setPortfolioResult(`Portfolio Template for ${portfolioInput.name}
+
+Header: ${portfolioInput.name} | ${portfolioInput.role || 'Freelance Professional'}
+
+About Me:
+I am a dedicated ${portfolioInput.role || 'professional'} with expertise in ${portfolioInput.skills || 'various skills'}. I help businesses achieve their goals through quality work and reliable service.
+
+Skills Section:
+${skills.map(s => `- ${s}`).join('\n') || '- Add your skills here'}
+
+Services:
+- Professional ${portfolioInput.role || 'services'} tailored to your needs
+- Fast turnaround with quality assurance
+- Clear communication throughout the project
+
+Portfolio Projects:
+1. [Project Name] — Brief description of what you delivered and the results
+2. [Project Name] — Brief description of what you delivered and the results
+3. [Project Name] — Brief description of what you delivered and the results
+
+Contact:
+- Email: [Your email]
+- LinkedIn: [Your profile URL]
+- Availability: Open to new projects
+
+Ready to build this portfolio? Use a free website builder like Carrd, Notion, or GitHub Pages to publish it.`);
+                }} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+                  <Sparkles className="w-5 h-5" /> Generate Portfolio
+                </button>
+                {portfolioResult && (
+                  <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl">
+                    <span className="text-cyan-400 text-sm font-medium flex items-center gap-1.5 mb-2"><Check className="w-4 h-4" /> Portfolio Template Generated</span>
+                    <pre className="text-white/80 text-sm whitespace-pre-wrap font-mono leading-relaxed max-h-64 overflow-y-auto">{portfolioResult}</pre>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
         {activeTool === 'proposal' && (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6 text-center">
-            <Send className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
-            <h3 className="text-white font-medium mb-2">Proposal Composer</h3>
-            <p className="text-white/50 text-sm">Generate winning proposals for any freelance project.</p>
-            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-xl text-black font-medium">Create Proposal</button>
+          <div className="space-y-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
+              <div className="space-y-4">
+                <input value={proposalInput.project} onChange={(e) => setProposalInput({ ...proposalInput, project: e.target.value })} placeholder="Project title or description" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                <div className="flex gap-3">
+                  <input value={proposalInput.budget} onChange={(e) => setProposalInput({ ...proposalInput, budget: e.target.value })} placeholder="Budget (e.g., $500)" className="flex-1 bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                  <input value={proposalInput.timeline} onChange={(e) => setProposalInput({ ...proposalInput, timeline: e.target.value })} placeholder="Timeline (e.g., 7 days)" className="flex-1 bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                </div>
+                <button onClick={() => {
+                  if (!proposalInput.project.trim()) return;
+                  setProposalResult(`Project Proposal: ${proposalInput.project}
+
+Hi there,
+
+I read your project description for "${proposalInput.project}" and I'm excited to submit my proposal.
+
+Why Choose Me:
+- Relevant experience delivering similar projects on time and on budget
+- Clear, proactive communication throughout the engagement
+- Commitment to quality — I don't consider the job done until you're satisfied
+
+My Approach:
+1. Discovery — Understand your exact requirements and goals
+2. Execution — Deliver ${proposalInput.project} with regular progress updates
+3. Review — Incorporate your feedback and refine
+4. Delivery — Final handover with documentation
+
+Timeline: ${proposalInput.timeline || '5-7 business days'}
+Budget: ${proposalInput.budget || 'Open to discussion'}
+
+I'm available to start immediately and can dedicate focused time to your project. Let's discuss the details — I'm happy to jump on a quick call.
+
+Looking forward to working with you!
+
+Best regards,
+${resume.name || 'Your Name'}`);
+                }} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+                  <Send className="w-5 h-5" /> Generate Proposal
+                </button>
+                {proposalResult && (
+                  <div className="mt-4 p-5 bg-cyan-400/10 border border-cyan-400/20 rounded-2xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-cyan-400 text-sm font-medium flex items-center gap-1.5"><Check className="w-4 h-4" /> Proposal Generated</span>
+                      <button onClick={() => navigator.clipboard?.writeText(proposalResult)} className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-400/20 border border-cyan-400/30 rounded-lg text-cyan-400 text-xs hover:bg-cyan-400/30 transition-colors">
+                        <Download className="w-3.5 h-3.5" /> Copy
+                      </button>
+                    </div>
+                    <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{proposalResult}</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </FullScreenTool>
@@ -984,6 +1274,14 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
   const [scamSearch, setScamSearch] = useState('');
   const [scamResult, setScamResult] = useState<{ safe: boolean; message: string } | null>(null);
   const [currency, setCurrency] = useState({ usd: '', pkr: '' });
+  const [timeEntries, setTimeEntries] = useState<{ start: string; duration: number }[]>([]);
+  const [timing, setTiming] = useState(false);
+  const [timerStart, setTimerStart] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [password, setPassword] = useState('');
+  const [passwordOpts, setPasswordOpts] = useState({ length: 16, upper: true, lower: true, numbers: true, symbols: true });
+  const [notes, setNotes] = useState<{ id: string; text: string; date: string }[]>([]);
+  const [noteInput, setNoteInput] = useState('');
   const rate = 278;
   const scamKeywords = ['MegaTypers', 'SurveyDollars', 'TaskEarning', 'PtclEarning', 'ClickWorkerPro', 'EarnFastCash', 'DailyTaskPay'];
 
@@ -1001,6 +1299,46 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
     setScamResult(found ? { safe: false, message: `"${found}" is a KNOWN SCAM SITE. Do NOT engage or share any personal information!` } : { safe: true, message: 'No known scams detected. Always verify independently before engaging.' });
   };
 
+  useEffect(() => {
+    if (!timing || timerStart === null) return;
+    const interval = setInterval(() => setElapsed(Date.now() - timerStart), 1000);
+    return () => clearInterval(interval);
+  }, [timing, timerStart]);
+
+  const toggleTimer = () => {
+    if (timing) {
+      const seconds = Math.round(elapsed / 1000);
+      setTimeEntries([...timeEntries, { start: new Date(timerStart!).toLocaleTimeString(), duration: seconds }]);
+      setTiming(false); setTimerStart(null); setElapsed(0);
+    } else {
+      setTiming(true); setTimerStart(Date.now()); setElapsed(0);
+    }
+  };
+
+  const generatePassword = () => {
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lower = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    let chars = '';
+    if (passwordOpts.upper) chars += upper;
+    if (passwordOpts.lower) chars += lower;
+    if (passwordOpts.numbers) chars += numbers;
+    if (passwordOpts.symbols) chars += symbols;
+    if (!chars) chars = lower;
+    let pwd = '';
+    for (let i = 0; i < passwordOpts.length; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
+    setPassword(pwd);
+  };
+
+  const addNote = () => {
+    if (!noteInput.trim()) return;
+    setNotes([...notes, { id: Date.now().toString(), text: noteInput.trim(), date: new Date().toLocaleDateString() }]);
+    setNoteInput('');
+  };
+
+  const deleteNote = (id: string) => setNotes(notes.filter(n => n.id !== id));
+
   if (activeTool && activeTool !== 'none') {
     const tool = tools.find(t => t.id === activeTool);
     if (!tool) return null;
@@ -1015,7 +1353,7 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
               <div className="flex gap-3">
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <input value={scamSearch} onChange={(e) => setScamSearch(e.target.value)} placeholder="Enter website name..." className="w-full bg-black/40 border border-white/5 rounded-2xl pl-12 pr-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                  <input value={scamSearch} onChange={(e) => setScamSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && checkScam()} placeholder="Enter website name..." className="w-full bg-black/40 border border-white/5 rounded-2xl pl-12 pr-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
                 </div>
                 <button onClick={checkScam} className="px-6 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-medium text-black shadow-lg shadow-cyan-400/25 hover:scale-[1.01] transition-transform">Check</button>
               </div>
@@ -1051,8 +1389,118 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
             </div>
           </div>
         )}
-        {(activeTool === 'rates' || activeTool === 'time' || activeTool === 'pass' || activeTool === 'notes') && (
-          <EmptyState icon={Icon} title={tool.title} desc="This tool is coming soon. Stay tuned for updates!" action={{ label: 'Get Notified', onClick: () => {} }} />
+        {activeTool === 'rates' && (
+          <div className="space-y-3">
+            {[
+              { role: 'Data Entry Specialist', beginner: '$15-20/hr', intermediate: '$22-30/hr', expert: '$30-40/hr' },
+              { role: 'Virtual Assistant', beginner: '$18-25/hr', intermediate: '$25-35/hr', expert: '$35-50/hr' },
+              { role: 'Content Writer', beginner: '$20-28/hr', intermediate: '$28-40/hr', expert: '$40-60/hr' },
+              { role: 'Social Media Designer', beginner: '$22-30/hr', intermediate: '$30-45/hr', expert: '$45-65/hr' },
+              { role: 'AI Prompt Engineer', beginner: '$30-40/hr', intermediate: '$40-55/hr', expert: '$55-80/hr' },
+            ].map((r, i) => (
+              <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-400/15 flex items-center justify-center"><BarChart3 className="w-5 h-5 text-cyan-400" /></div>
+                  <h3 className="text-white font-medium">{r.role}</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 bg-black/30 rounded-xl"><p className="text-white/40 text-xs">Beginner</p><p className="text-cyan-400 text-sm font-medium mt-1">{r.beginner}</p></div>
+                  <div className="text-center p-2 bg-black/30 rounded-xl"><p className="text-white/40 text-xs">Intermediate</p><p className="text-cyan-400 text-sm font-medium mt-1">{r.intermediate}</p></div>
+                  <div className="text-center p-2 bg-black/30 rounded-xl"><p className="text-white/40 text-xs">Expert</p><p className="text-cyan-400 text-sm font-medium mt-1">{r.expert}</p></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {activeTool === 'time' && (
+          <div className="space-y-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6 text-center">
+              <div className="text-5xl font-mono font-bold text-white mb-4">
+                {Math.floor(elapsed / 3600000).toString().padStart(2, '0')}:{Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0')}:{Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0')}
+              </div>
+              <button onClick={toggleTimer} className={`px-8 py-3 rounded-xl font-medium transition-all ${timing ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-black'}`}>
+                {timing ? 'Stop Timer' : 'Start Timer'}
+              </button>
+            </div>
+            {timeEntries.length > 0 && (
+              <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-4">
+                <h3 className="text-white font-medium mb-3">Time Entries</h3>
+                <div className="space-y-2">
+                  {timeEntries.map((entry, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-black/30 rounded-xl">
+                      <span className="text-white/60 text-sm">Started at {entry.start}</span>
+                      <span className="text-cyan-400 text-sm font-medium">{Math.floor(entry.duration / 60)}m {entry.duration % 60}s</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-3 border-t border-white/5 flex justify-between">
+                  <span className="text-white/40 text-sm">Total Time</span>
+                  <span className="text-cyan-400 font-medium">{Math.floor(timeEntries.reduce((a, e) => a + e.duration, 0) / 60)}m {timeEntries.reduce((a, e) => a + e.duration, 0) % 60}s</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {activeTool === 'pass' && (
+          <div className="space-y-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
+              {password && (
+                <div className="mb-4 p-4 bg-black/40 border border-cyan-400/20 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white/40 text-xs">Generated Password</span>
+                    <button onClick={() => navigator.clipboard?.writeText(password)} className="text-cyan-400 text-xs hover:text-cyan-300">Copy</button>
+                  </div>
+                  <p className="text-cyan-400 font-mono text-lg break-all">{password}</p>
+                </div>
+              )}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-white/50 text-sm mb-2 block">Length: {passwordOpts.length}</label>
+                  <input type="range" min="8" max="32" value={passwordOpts.length} onChange={(e) => setPasswordOpts({ ...passwordOpts, length: parseInt(e.target.value) })} className="w-full accent-cyan-400" />
+                </div>
+                {[
+                  { key: 'upper', label: 'Uppercase (A-Z)' },
+                  { key: 'lower', label: 'Lowercase (a-z)' },
+                  { key: 'numbers', label: 'Numbers (0-9)' },
+                  { key: 'symbols', label: 'Symbols (!@#$...)' },
+                ].map(opt => (
+                  <label key={opt.key} className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={passwordOpts[opt.key as keyof typeof passwordOpts] as boolean} onChange={(e) => setPasswordOpts({ ...passwordOpts, [opt.key]: e.target.checked })} className="w-5 h-5 accent-cyan-400 rounded" />
+                    <span className="text-white/70 text-sm">{opt.label}</span>
+                  </label>
+                ))}
+                <button onClick={generatePassword} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black flex items-center justify-center gap-2 shadow-xl shadow-cyan-400/25 hover:scale-[1.01] transition-transform">
+                  <LockKeyhole className="w-5 h-5" /> Generate Password
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {activeTool === 'notes' && (
+          <div className="space-y-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
+              <div className="flex gap-2 mb-4">
+                <input value={noteInput} onChange={(e) => setNoteInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addNote()} placeholder="Write a quick note..." className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+                <button onClick={addNote} className="px-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-xl font-medium text-black hover:scale-[1.02] transition-transform"><Plus className="w-5 h-5" /></button>
+              </div>
+              {notes.length === 0 ? (
+                <p className="text-white/40 text-sm text-center py-8">No notes yet. Start by writing one above!</p>
+              ) : (
+                <div className="space-y-2">
+                  {notes.map(note => (
+                    <div key={note.id} className="flex items-start gap-3 p-3 bg-black/30 rounded-xl border border-white/5">
+                      <FileText className="w-4 h-4 text-cyan-400/60 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-white/80 text-sm">{note.text}</p>
+                        <p className="text-white/30 text-xs mt-1">{note.date}</p>
+                      </div>
+                      <button onClick={() => deleteNote(note.id)} className="text-white/30 hover:text-red-400 transition-colors"><X className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </FullScreenTool>
     );
@@ -1072,18 +1520,80 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
   );
 };
 
+// Courses View
+const CoursesView = ({ onProfile, onSettings, learning, onBack }: { onProfile: () => void; onSettings: () => void; learning: ReturnType<typeof useLearningProgress>; onBack: () => void }) => {
+  const { progress, updateCourseProgress, completeCourse } = learning;
+  const courses = SAMPLE_COURSES.map(c => ({ ...c, progress: progress[c.title] || c.baseProgress }));
+
+  return (
+    <div className="min-h-screen bg-[#0B0F19] relative">
+      <SparksBackground />
+      <Header onProfile={onProfile} onSettings={onSettings} title="All Courses" hideTicker />
+      <main className="px-4 py-6 max-w-2xl mx-auto pb-24 relative z-10">
+        <button onClick={onBack} className="flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-4 group">
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-medium">Back to Dashboard</span>
+        </button>
+        <div className="grid gap-3">
+          {courses.map((c, i) => (
+            <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-5 hover:border-cyan-400/20 transition-all">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 flex items-center justify-center">
+                  <c.icon className="w-6 h-6 text-cyan-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-white font-medium">{c.title}</h3>
+                  <p className="text-white/40 text-xs">{c.lessons} lessons</p>
+                </div>
+                {c.progress >= 100 && <Trophy className="w-5 h-5 text-yellow-400" />}
+              </div>
+              {c.progress > 0 && (
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500" style={{ width: `${c.progress}%` }} />
+                  </div>
+                  <span className="text-white/40 text-xs">{c.progress}%</span>
+                </div>
+              )}
+              <div className="flex gap-2">
+                {c.progress < 100 ? (
+                  <>
+                    <button onClick={() => updateCourseProgress(c.title, Math.min(100, c.progress + 25))} className="flex-1 py-2.5 bg-cyan-400/10 border border-cyan-400/20 rounded-xl text-cyan-400 text-sm font-medium hover:bg-cyan-400/20 transition-colors flex items-center justify-center gap-1.5">
+                      <Play className="w-3.5 h-3.5" /> {c.progress === 0 ? 'Start Course' : 'Continue'}
+                    </button>
+                    <button onClick={() => completeCourse(c.title)} className="px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-colors flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5" /> Complete
+                    </button>
+                  </>
+                ) : (
+                  <div className="w-full text-center py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm font-medium flex items-center justify-center gap-1.5">
+                    <Award className="w-4 h-4" /> Course Completed!
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+};
+
 const Dashboard = ({ onSignOut, profile, session }: { onSignOut: () => void; profile: Profile | null; session: Session | null }) => {
   const [nav, setNav] = useState('home');
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [writerTool, setWriterTool] = useState('none');
   const [utilityTool, setUtilityTool] = useState('none');
+  const learning = useLearningProgress(session?.user?.id);
 
-  const handleNavigate = (tab: string, tool?: string) => {
+  const handleNavigate = (tab: string) => {
     setNav(tab);
-    if (tool && tab === 'writer') setWriterTool(tool);
-    if (tool && tab === 'utilities') setUtilityTool(tool);
+    setWriterTool('none');
+    setUtilityTool('none');
   };
+
+  const showFullTool = (nav === 'writer' && writerTool !== 'none') || (nav === 'utilities' && utilityTool !== 'none') || nav === 'courses';
 
   return (
     <div className="min-h-screen bg-[#0B0F19] relative">
@@ -1092,16 +1602,18 @@ const Dashboard = ({ onSignOut, profile, session }: { onSignOut: () => void; pro
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[150px]" />
         <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-cyan-600/5 rounded-full blur-[180px]" />
       </div>
-      {(nav === 'writer' && writerTool !== 'none') || (nav === 'utilities' && utilityTool !== 'none') ? (
-        nav === 'writer' ? (
+      {showFullTool ? (
+        nav === 'courses' ? (
+          <CoursesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} learning={learning} onBack={() => setNav('home')} />
+        ) : nav === 'writer' ? (
           <WriterToolsView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool={writerTool} setActiveTool={setWriterTool} />
         ) : (
           <UtilitiesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool={utilityTool} setActiveTool={setUtilityTool} />
         )
       ) : (
         <>
-          {nav === 'home' && <HomeView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} onNavigate={handleNavigate} profile={profile} session={session} />}
-          {nav === 'ai' && <AIAssistantView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} />}
+          {nav === 'home' && <HomeView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} onNavigate={handleNavigate} profile={profile} session={session} learning={learning} />}
+          {nav === 'ai' && <AIAssistantView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} session={session} profile={profile} />}
           {nav === 'writer' && <WriterToolsView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool="none" setActiveTool={setWriterTool} />}
           {nav === 'utilities' && <UtilitiesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool="none" setActiveTool={setUtilityTool} />}
           <BottomNav active={nav} setActive={setNav} />
@@ -1141,7 +1653,7 @@ function App() {
         (async () => { const p = await fetchProfile(s.user.id); if (mounted) setProfile(p); })();
       } else { setProfile(null); }
     });
-    return () => { mounted = false; clearTimeout(timer); sub.subscription.unsubscribe(); };
+    return () => { mounted = false; clearTimeout(timer); sub?.subscription?.unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -1178,7 +1690,6 @@ function App() {
     </div>
   );
 
-  // Landing page — visible to everyone. "Get Started" conditionally redirects.
   if (!started) return (
     <>
       <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center px-6 relative overflow-hidden">
@@ -1209,7 +1720,6 @@ function App() {
     </>
   );
 
-  // AUTH GUARD — user clicked "Go to Dashboard" but has no session
   if (!session) return (
     <>
       <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center px-6 relative overflow-hidden">
@@ -1238,10 +1748,8 @@ function App() {
     </>
   );
 
-  // Authenticated — VIP welcome overlay (new users only)
   if (showWelcome) return <VipWelcomeOverlay onBegin={beginTour} />;
 
-  // Feature tour steps
   if (tourStep >= 0) return (
     <TourFeatureStep
       step={tourStep}
