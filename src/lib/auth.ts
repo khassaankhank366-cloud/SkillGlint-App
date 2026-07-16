@@ -20,16 +20,6 @@ export async function signUp(email: string, password: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function signInWithGoogle(): Promise<void> {
-  const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-  if (error) throw error;
-}
-
-export async function signInWithLinkedIn(): Promise<void> {
-  const { error } = await supabase.auth.signInWithOAuth({ provider: 'linkedin' });
-  if (error) throw error;
-}
-
 export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;

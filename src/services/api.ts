@@ -10,15 +10,6 @@ export interface JobListing {
   url?: string;
 }
 
-const FALLBACK_JOBS: JobListing[] = [
-  { title: 'Data Entry Specialist', company: 'TechFlow', pay: '$22/hr', rating: 4.8, source: 'fallback' },
-  { title: 'Virtual Assistant', company: 'RemoteFirst', pay: '$25/hr', rating: 4.6, source: 'fallback' },
-  { title: 'Social Media Designer', company: 'CreativeHub', pay: '$30/hr', rating: 4.9, source: 'fallback' },
-  { title: 'AI Trainer', company: 'NeuralAI', pay: '$40/hr', rating: 4.7, source: 'fallback' },
-  { title: 'Content Writer', company: 'WriteHub', pay: '$28/hr', rating: 4.5, source: 'fallback' },
-  { title: 'Freelance PM', company: 'Upwork Pro', pay: '$32/hr', rating: 4.8, source: 'fallback' },
-];
-
 export async function fetchLiveJobs(): Promise<JobListing[]> {
   try {
     const { data, error } = await supabase
@@ -27,10 +18,13 @@ export async function fetchLiveJobs(): Promise<JobListing[]> {
       .order('created_at', { ascending: false })
       .limit(12);
 
+    if (error) console.error('[jobs] Supabase query error:', error.message);
     if (!error && data && data.length > 0) {
       return data as JobListing[];
     }
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.error('[jobs] Supabase fetch failed:', e);
+  }
 
   try {
     const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jobs-api`;
@@ -45,10 +39,15 @@ export async function fetchLiveJobs(): Promise<JobListing[]> {
     if (res.ok) {
       const data = await res.json();
       if (data.jobs && data.jobs.length > 0) return data.jobs as JobListing[];
+      if (data.error) console.error('[jobs] Edge function error:', data.error);
+    } else {
+      console.error('[jobs] Edge function HTTP error:', res.status, res.statusText);
     }
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.error('[jobs] Edge function fetch failed:', e);
+  }
 
-  return FALLBACK_JOBS;
+  return [];
 }
 
 export interface CourseWithProgress {
