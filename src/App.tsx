@@ -3,9 +3,10 @@ import { supabase } from './lib/supabaseClient';
 import { signIn, signUp, signOut, getSession, onAuthStateChange, isValidEmail, getDisplayName, getInitial } from './lib/auth';
 import { fetchProfile, type Profile } from './lib/profile';
 import { saveAndGenerateResume, downloadResumeAsPDF } from './lib/resume';
+import { setPinCode, disablePin, unlockWithPin, isPinUnlocked, clearPinSession } from './lib/pin';
 import type { Session } from '@supabase/supabase-js';
 import { Home, Bot, PenTool, Wrench, Settings, Shield, Search, Send, ChevronRight, Star, Gift, Flame, Trophy, FileText, RefreshCw, FileEdit, DollarSign, Download, Sparkles, Target, TrendingUp, X, Briefcase, ArrowLeft, Plus, Mic, Palette, LayoutTemplate, User, BookOpen, Clock, Brain, BarChart3, LockKeyhole, HelpCircle, SkipForward, Mail, Link2, Image, FileUp, Cloud, Lightbulb, Compass, Loader2, Check, Award, Play, Lock, KeyRound, ShieldCheck, FileDown } from 'lucide-react';
-import { fetchLiveJobs, fetchCourses, fetchLessons, fetchUserProgress, markLessonComplete, reportScam, createSupportTicket, setPinCode, disablePin, exportUserData } from './services/api';
+import { fetchLiveJobs, fetchCourses, fetchLessons, fetchUserProgress, markLessonComplete, reportScam, createSupportTicket, exportUserData } from './services/api';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 
@@ -223,7 +224,7 @@ const Header = ({ onProfile, onSettings, title, subtitle, hideTicker, profile, s
           </div>
           <div className="flex items-center gap-2">
             <button onClick={onProfile} className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center ring-2 ring-cyan-400/20 hover:scale-105 transition-transform shadow-lg shadow-cyan-400/20">
-              <span className="text-black font-bold text-sm">{getInitial(session, profile)}</span>
+              <span className="text-black font-bold text-sm">{getInitial(session ?? null, profile)}</span>
             </button>
             <button onClick={onSettings} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-cyan-400/20 hover:border-cyan-400/30 transition-all">
               <Settings className="w-5 h-5 text-cyan-400" />
@@ -434,7 +435,7 @@ const IncomeGoalTracker = () => {
   );
 };
 
-const SettingsModal = ({ onClose, onSignOut, session, onNavigatePage }: { onClose: () => void; onSignOut: () => void; session: Session | null; onNavigatePage: (page: string) => void }) => {
+const SettingsPage = ({ onBack, onSignOut, session, onNavigatePage, profile }: { onBack: () => void; onSignOut: () => void; session: Session | null; onNavigatePage: (page: string) => void; profile: Profile | null }) => {
   const [signingOut, setSigningOut] = useState(false);
   const [view, setView] = useState('menu');
   const [pin, setPin] = useState('');
@@ -447,6 +448,7 @@ const SettingsModal = ({ onClose, onSignOut, session, onNavigatePage }: { onClos
 
   const handleSignOut = async () => {
     setSigningOut(true);
+    clearPinSession();
     try { await signOut(); } catch { /* ignore */ }
     onSignOut();
   };
@@ -479,60 +481,71 @@ const SettingsModal = ({ onClose, onSignOut, session, onNavigatePage }: { onClos
     { icon: HelpCircle, label: 'Help & Support', action: () => setView('support') }
   ];
 
-  if (view === 'security' || view === 'support') {
+  const SubHeader = ({ title }: { title: string }) => (
+    <header className="sticky top-0 bg-[#0B0F19]/90 backdrop-blur-xl border-b border-white/5 z-20">
+      <div className="flex items-center gap-3 px-4 py-3 max-w-2xl mx-auto">
+        <button onClick={view === 'menu' ? onBack : () => setView('menu')} className="w-9 h-9 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-cyan-400/20 transition-all">
+          <ArrowLeft className="w-5 h-5 text-cyan-400" />
+        </button>
+        <h1 className="text-white font-medium text-lg">{title}</h1>
+      </div>
+    </header>
+  );
+
+  if (view === 'security') {
     return (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center px-4" onClick={onClose}>
-        <div className="bg-gradient-to-b from-white/10 to-white/5 border border-white/5 rounded-3xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              <button onClick={() => setView('menu')} className="text-white/40 hover:text-white transition-colors"><ArrowLeft className="w-5 h-5" /></button>
-              <h2 className="text-white font-semibold text-xl">{view === 'security' ? 'Security' : 'Help & Support'}</h2>
-            </div>
-            <button onClick={onClose} className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+      <div className="min-h-screen bg-[#0B0F19] relative">
+        <SparksBackground />
+        <SubHeader title="Security" />
+        <main className="px-4 py-6 max-w-md mx-auto pb-24 relative z-10">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-3 mb-2"><ShieldCheck className="w-8 h-8 text-cyan-400" /><p className="text-white/60 text-sm">Set a 4-digit PIN to add an extra layer of security at app launch. The PIN is stored hashed and never sent in plaintext.</p></div>
+            {profile?.pin_enabled && <p className="text-cyan-400 text-sm flex items-center gap-1.5"><Lock className="w-4 h-4" /> PIN lock is currently active.</p>}
+            <input value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="Enter 4-digit PIN" type="password" inputMode="numeric" maxLength={4} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-center text-2xl tracking-[0.5em] placeholder-white/30 focus:border-cyan-400/50 outline-none transition-colors" />
+            <input value={pinConfirm} onChange={e => setPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="Confirm PIN" type="password" inputMode="numeric" maxLength={4} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-center text-2xl tracking-[0.5em] placeholder-white/30 focus:border-cyan-400/50 outline-none transition-colors" />
+            {pinError && <p className="text-red-400 text-sm">{pinError}</p>}
+            {pinSuccess && <p className="text-emerald-400 text-sm">{pinSuccess}</p>}
+            <button onClick={handleSetPin} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black hover:scale-[1.01] transition-transform">{profile?.pin_enabled ? 'Update PIN' : 'Set PIN'}</button>
+            {profile?.pin_enabled && <button onClick={handleRemovePin} className="w-full py-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-medium hover:bg-red-500/20 transition-colors">Remove PIN Lock</button>}
           </div>
-          {view === 'security' ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 mb-2"><ShieldCheck className="w-8 h-8 text-cyan-400" /><p className="text-white/60 text-sm">Set a 4-digit PIN to add an extra layer of security at app launch.</p></div>
-              <input value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="Enter 4-digit PIN" type="password" inputMode="numeric" maxLength={4} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-center text-2xl tracking-[0.5em] placeholder-white/30 focus:border-cyan-400/50 outline-none transition-colors" />
-              <input value={pinConfirm} onChange={e => setPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="Confirm PIN" type="password" inputMode="numeric" maxLength={4} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-center text-2xl tracking-[0.5em] placeholder-white/30 focus:border-cyan-400/50 outline-none transition-colors" />
-              {pinError && <p className="text-red-400 text-sm">{pinError}</p>}
-              {pinSuccess && <p className="text-emerald-400 text-sm">{pinSuccess}</p>}
-              <button onClick={handleSetPin} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black hover:scale-[1.01] transition-transform">Set PIN</button>
-              <button onClick={handleRemovePin} className="w-full py-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-medium hover:bg-red-500/20 transition-colors">Remove PIN Lock</button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <input value={ticketSubject} onChange={e => setTicketSubject(e.target.value)} placeholder="Subject" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
-              <textarea value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} placeholder="Describe your issue..." rows={5} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none resize-none transition-colors" />
-              {ticketStatus && <p className={ticketStatus.includes('Error') ? 'text-red-400 text-sm' : 'text-emerald-400 text-sm'}>{ticketStatus}</p>}
-              <button onClick={handleSubmitTicket} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black hover:scale-[1.01] transition-transform">Submit Ticket</button>
-            </div>
-          )}
-        </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (view === 'support') {
+    return (
+      <div className="min-h-screen bg-[#0B0F19] relative">
+        <SparksBackground />
+        <SubHeader title="Help & Support" />
+        <main className="px-4 py-6 max-w-md mx-auto pb-24 relative z-10">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-6 space-y-4">
+            <input value={ticketSubject} onChange={e => setTicketSubject(e.target.value)} placeholder="Subject" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none transition-colors" />
+            <textarea value={ticketMessage} onChange={e => setTicketMessage(e.target.value)} placeholder="Describe your issue..." rows={5} className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-white/40 focus:border-cyan-400/50 outline-none resize-none transition-colors" />
+            {ticketStatus && <p className={ticketStatus.includes('Error') ? 'text-red-400 text-sm' : 'text-emerald-400 text-sm'}>{ticketStatus}</p>}
+            <button onClick={handleSubmitTicket} className="w-full py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-2xl font-semibold text-black hover:scale-[1.01] transition-transform">Submit Ticket</button>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center px-4" onClick={signingOut ? undefined : onClose}>
-      <div className="bg-gradient-to-b from-white/10 to-white/5 border border-white/5 rounded-3xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-white font-semibold text-xl">Settings</h2>
-          <button onClick={onClose} disabled={signingOut} className="text-white/40 hover:text-white transition-colors disabled:opacity-40"><X className="w-5 h-5" /></button>
-        </div>
-        <div className="space-y-3">
-          {menuItems.map((item, i) => (
-            <button key={i} onClick={item.action} className="w-full flex items-center gap-4 bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/10 transition-all">
-              <item.icon className="w-5 h-5 text-cyan-400" />
-              <span className="text-white flex-1 text-left">{item.label}</span>
-              <ChevronRight className="w-4 h-4 text-white/30" />
-            </button>
-          ))}
-          <button onClick={handleSignOut} disabled={signingOut} className="w-full bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-red-400 hover:bg-red-500/20 transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-60">
-            {signingOut ? <span className="w-5 h-5 border-2 border-red-400/30 border-t-red-400 rounded-full" style={{ animation: 'spin 0.6s linear infinite' }} /> : 'Sign Out'}
+    <div className="min-h-screen bg-[#0B0F19] relative">
+      <SparksBackground />
+      <SubHeader title="Settings" />
+      <main className="px-4 py-6 max-w-md mx-auto pb-24 relative z-10 space-y-3">
+        {menuItems.map((item, i) => (
+          <button key={i} onClick={item.action} className="w-full flex items-center gap-4 bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/10 transition-all">
+            <item.icon className="w-5 h-5 text-cyan-400" />
+            <span className="text-white flex-1 text-left">{item.label}</span>
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </button>
-        </div>
-      </div>
+        ))}
+        <button onClick={handleSignOut} disabled={signingOut} className="w-full bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-red-400 hover:bg-red-500/20 transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-60">
+          {signingOut ? <span className="w-5 h-5 border-2 border-red-400/30 border-t-red-400 rounded-full" style={{ animation: 'spin 0.6s linear infinite' }} /> : 'Sign Out'}
+        </button>
+      </main>
     </div>
   );
 };
@@ -589,16 +602,6 @@ const CareerInsightCard = ({ courses }: { courses: { title: string; progress: nu
     </div>
   );
 };
-
-// Professional Empty State
-const EmptyState = ({ icon: Icon, title, desc, action }: { icon: React.ElementType; title: string; desc: string; action?: { label: string; onClick: () => void } }) => (
-  <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in-up">
-    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4"><Icon className="w-8 h-8 text-white/25" /></div>
-    <p className="text-white/60 text-sm font-medium">{title}</p>
-    <p className="text-white/35 text-xs mt-1.5 max-w-xs">{desc}</p>
-    {action && <button onClick={action.onClick} className="mt-4 px-5 py-2.5 bg-cyan-400/10 border border-cyan-400/20 rounded-xl text-cyan-400 text-sm font-medium hover:bg-cyan-400/20 hover:scale-[1.02] active:scale-[0.97] transition-all">{action.label}</button>}
-  </div>
-);
 
 // AI Assistant Attachment Menu - solid dark background for readability
 const AIAttachMenu = ({ onClose, onSelect }: { onClose: () => void; onSelect: (label: string) => void }) => {
@@ -1528,9 +1531,8 @@ const UtilitiesView = ({ onProfile, onSettings, activeTool, setActiveTool }: { o
 };
 
 const CoursesView = ({ onProfile, onSettings, learning, onBack }: { onProfile: () => void; onSettings: () => void; learning: ReturnType<typeof useLearningProgress>; onBack: () => void }) => {
-  const { progress, updateCourseProgress, completeCourse, courseMap } = learning;
+  const { progress, updateCourseProgress, completeCourse } = learning;
   const [courses, setCourses] = useState<{ id: string; title: string; lessons: number; progress: number; icon: React.ElementType }[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -1544,7 +1546,6 @@ const CoursesView = ({ onProfile, onSettings, learning, onBack }: { onProfile: (
         icon: iconByName[c.icon_name || ''] || (SAMPLE_COURSES.find(sc => sc.title === c.title)?.icon) || BookOpen,
       }));
       setCourses(mapped.length > 0 ? mapped : SAMPLE_COURSES.map(c => ({ id: '', ...c, progress: 0 })));
-      setLoading(false);
     })();
   }, [progress]);
 
@@ -1605,7 +1606,6 @@ const CoursesView = ({ onProfile, onSettings, learning, onBack }: { onProfile: (
 const Dashboard = ({ onSignOut, profile, session }: { onSignOut: () => void; profile: Profile | null; session: Session | null }) => {
   const [nav, setNav] = useState('home');
   const [showProfile, setShowProfile] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [writerTool, setWriterTool] = useState('none');
   const [utilityTool, setUtilityTool] = useState('none');
   const [page, setPage] = useState<string | null>(null);
@@ -1619,6 +1619,12 @@ const Dashboard = ({ onSignOut, profile, session }: { onSignOut: () => void; pro
     if (tool && tab === 'utilities') setUtilityTool(tool);
   };
 
+  const goSettings = () => setPage('settings');
+
+  if (page === 'settings') return <SettingsPage onBack={() => setPage(null)} onSignOut={onSignOut} session={session} onNavigatePage={(p) => setPage(p)} profile={profile} />;
+  if (page === 'privacy') return <Privacy onBack={() => setPage(null)} />;
+  if (page === 'terms') return <Terms onBack={() => setPage(null)} />;
+
   return (
     <div className="min-h-screen bg-[#0B0F19] relative">
       <SparksBackground />
@@ -1627,26 +1633,23 @@ const Dashboard = ({ onSignOut, profile, session }: { onSignOut: () => void; pro
         <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-cyan-600/5 rounded-full blur-[180px]" />
       </div>
       {nav === 'courses' ? (
-        <CoursesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} learning={learning} onBack={() => setNav('home')} />
+        <CoursesView onProfile={() => setShowProfile(true)} onSettings={goSettings} learning={learning} onBack={() => setNav('home')} />
       ) : (nav === 'writer' && writerTool !== 'none') || (nav === 'utilities' && utilityTool !== 'none') ? (
         nav === 'writer' ? (
-          <WriterToolsView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool={writerTool} setActiveTool={setWriterTool} />
+          <WriterToolsView onProfile={() => setShowProfile(true)} onSettings={goSettings} activeTool={writerTool} setActiveTool={setWriterTool} />
         ) : (
-          <UtilitiesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool={utilityTool} setActiveTool={setUtilityTool} />
+          <UtilitiesView onProfile={() => setShowProfile(true)} onSettings={goSettings} activeTool={utilityTool} setActiveTool={setUtilityTool} />
         )
       ) : (
         <>
-          {nav === 'home' && <HomeView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} onNavigate={handleNavigate} profile={profile} session={session} learning={learning} />}
-          {nav === 'ai' && <AIAssistantView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} session={session} profile={profile} />}
-          {nav === 'writer' && <WriterToolsView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool="none" setActiveTool={setWriterTool} />}
-          {nav === 'utilities' && <UtilitiesView onProfile={() => setShowProfile(true)} onSettings={() => setShowSettings(true)} activeTool="none" setActiveTool={setUtilityTool} />}
+          {nav === 'home' && <HomeView onProfile={() => setShowProfile(true)} onSettings={goSettings} onNavigate={handleNavigate} profile={profile} session={session} learning={learning} />}
+          {nav === 'ai' && <AIAssistantView onProfile={() => setShowProfile(true)} onSettings={goSettings} session={session} profile={profile} />}
+          {nav === 'writer' && <WriterToolsView onProfile={() => setShowProfile(true)} onSettings={goSettings} activeTool="none" setActiveTool={setWriterTool} />}
+          {nav === 'utilities' && <UtilitiesView onProfile={() => setShowProfile(true)} onSettings={goSettings} activeTool="none" setActiveTool={setUtilityTool} />}
           <BottomNav active={nav} setActive={setNav} />
         </>
       )}
       {showProfile && <ProfileModal onClose={() => setShowProfile(false)} profile={profile} session={session} />}
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} onSignOut={onSignOut} session={session} onNavigatePage={(p) => { setShowSettings(false); setPage(p); }} />}
-      {page === 'privacy' && <Privacy onBack={() => setPage(null)} />}
-      {page === 'terms' && <Terms onBack={() => setPage(null)} />}
     </div>
   );
 };
@@ -1662,6 +1665,7 @@ function App() {
   const [pinVerified, setPinVerified] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
+  const [pinVerifying, setPinVerifying] = useState(false);
   const totalSteps = 4;
 
   useEffect(() => {
@@ -1692,11 +1696,23 @@ function App() {
     }
   }, [session, tourStep, showWelcome]);
 
+  // Reset PIN state only when the user identity changes (sign-in/sign-out), not on every session tick.
+  // If the PIN was already unlocked this browser session, keep it unlocked (no re-entry within the same session).
   useEffect(() => {
-    setPinVerified(false);
+    if (!session) {
+      setPinVerified(false);
+      setPinInput('');
+      setPinError('');
+      return;
+    }
+    if (isPinUnlocked(session.user.id)) {
+      setPinVerified(true);
+    } else {
+      setPinVerified(false);
+    }
     setPinInput('');
     setPinError('');
-  }, [session]);
+  }, [session?.user?.id]);
 
   const beginTour = () => {
     setShowWelcome(false);
@@ -1709,13 +1725,15 @@ function App() {
   };
 
   const handleSignOut = async () => {
-    try { await signOut(); } catch {}
+    clearPinSession();
+    try { await signOut(); } catch { /* ignore */ }
     setSession(null);
     setStarted(false);
     setShowWelcome(false);
     setTourStep(-1);
     setIsAuthOpen(false);
     setProfile(null);
+    setPinVerified(false);
   };
 
   if (sessionLoading) return (
@@ -1785,8 +1803,23 @@ function App() {
     </>
   );
 
-  // PIN lock — MUST be checked before welcome overlay, tour, and dashboard
+  // SESSION LOCK — enforce PIN entry on app startup if the user has a PIN set.
+  // Uses sessionStorage so the unlock persists across reloads within the same browser session
+  // but is re-requested after the browser/app is closed and reopened.
+  // Does NOT sign the user out on wrong PIN — just re-prompts.
   if (session && profile?.pin_enabled && profile?.pin_code && !pinVerified) {
+    const submitPin = async (val: string) => {
+      setPinVerifying(true);
+      setPinError('');
+      const ok = await unlockWithPin(session, val, profile.pin_code);
+      setPinVerifying(false);
+      if (ok) {
+        setPinVerified(true);
+      } else {
+        setPinError('Incorrect PIN. Try again.');
+        setPinInput('');
+      }
+    };
     return (
       <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center px-6 relative overflow-hidden">
         <SparksBackground />
@@ -1796,31 +1829,26 @@ function App() {
             <LockKeyhole className="w-8 h-8 text-cyan-400" />
           </div>
           <h2 className="text-white font-medium text-xl mb-2">Enter PIN</h2>
-          <p className="text-white/40 text-sm mb-8">Enter your 4-digit PIN to continue</p>
+          <p className="text-white/40 text-sm mb-8">Enter your 4-digit PIN to unlock SkillGlint</p>
           <input
             value={pinInput}
             onChange={(e) => {
               const val = e.target.value.replace(/\D/g, '').slice(0, 4);
               setPinInput(val);
               setPinError('');
-              if (val.length === 4) {
-                if (val === profile.pin_code) {
-                  setPinVerified(true);
-                } else {
-                  setPinError('Incorrect PIN. Try again.');
-                  setPinInput('');
-                }
-              }
+              if (val.length === 4) submitPin(val);
             }}
             type="password"
             inputMode="numeric"
             autoFocus
+            disabled={pinVerifying}
             placeholder="••••"
             maxLength={4}
-            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-center text-3xl tracking-[0.5em] placeholder-white/20 focus:border-cyan-400/50 outline-none transition-colors mb-4"
+            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-center text-3xl tracking-[0.5em] placeholder-white/20 focus:border-cyan-400/50 outline-none transition-colors mb-4 disabled:opacity-60"
           />
           {pinError && <p className="text-red-400 text-sm">{pinError}</p>}
-          <button onClick={() => setPinVerified(true)} className="text-white/30 text-xs mt-4 hover:text-white/60 transition-colors">Forgot PIN? Skip for now</button>
+          {pinVerifying && <span className="w-5 h-5 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full mt-2" style={{ animation: 'spin 0.6s linear infinite' }} />}
+          <button onClick={handleSignOut} className="text-white/30 text-xs mt-6 hover:text-white/60 transition-colors">Sign out instead</button>
         </div>
       </div>
     );
