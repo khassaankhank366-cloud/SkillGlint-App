@@ -154,32 +154,6 @@ export async function createSupportTicket(session: Session | null, subject: stri
   }
 }
 
-export async function setPinCode(session: Session | null, pin: string): Promise<{ error: string | null }> {
-  if (!session) return { error: 'Not authenticated' };
-  try {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ pin_code: pin, pin_enabled: true })
-      .eq('id', session.user.id);
-    return { error: error?.message || null };
-  } catch (e) {
-    return { error: (e as Error).message };
-  }
-}
-
-export async function disablePin(session: Session | null): Promise<{ error: string | null }> {
-  if (!session) return { error: 'Not authenticated' };
-  try {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ pin_code: null, pin_enabled: false })
-      .eq('id', session.user.id);
-    return { error: error?.message || null };
-  } catch (e) {
-    return { error: (e as Error).message };
-  }
-}
-
 export async function exportUserData(session: Session | null): Promise<void> {
   if (!session) return;
   try {
